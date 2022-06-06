@@ -152,7 +152,7 @@ func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLog
 			logger.WithError(err).Error("Unable to generate svg file.")
 			return nil, false
 		}
-		if err := exec.Command("inkscape", "-w", "360", "-h", "360", svgFilePath, "-o", pngFilePath).Run(); err != nil {
+		if err := exec.Command("inkscape", "-w", "720", "-h", "720", svgFilePath, "-o", pngFilePath).Run(); err != nil {
 			logger.WithError(err).Error("Unable to convert to png.")
 			return nil, false
 		}
