@@ -1,0 +1,8 @@
+{
+  "editor.formatOnSave": true,
+  "go.formatTool": "gofmt",
+  "go.lintTool": "golint",
+  "cSpell.words": [
+    "Mirai"
+  ],
+}
