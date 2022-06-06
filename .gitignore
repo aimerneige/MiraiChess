@@ -38,3 +38,15 @@ logs/*.log
 
 ### build target ###
 bin/mirai-chess-bot-*
+
+### mirai ###
+device.json
+session.token
+
+### temp ###
+temp/*.png
+temp/*.svg
+
+### config ###
+config/*.yaml
+config/*.yml
