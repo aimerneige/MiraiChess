@@ -1,0 +1,5 @@
+bot:
+  loginmethod: qrcode
+logiase:
+  autoreply:
+    path: "./config/autoreply.yaml"
