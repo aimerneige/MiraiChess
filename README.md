@@ -24,7 +24,8 @@ git clone https://github.com/aimerneige/MiraiChess.git
 cd MiraiChess
 ```
 
-执行脚本下载 inkscape：
+执行脚本下载 inkscape：\
+:warning: 脚本中使用了相对路径，请一定在项目根目录下执行脚本。
 
 ```bash
 ./scripts/download_inkscape.sh
@@ -65,6 +66,17 @@ mv device.json ../
 ```bash
 nohup ./bin/mirai-chess-bot-linux-amd64-v0.0.1 &
 ```
+
+## FAQ
+
+### 是否会支持群内多盘对局同时进行
+
+每个群内同时只能存在一盘对局，如果有多盘对局同时进行的需求可以 fork 之后自己改。\
+本项目主要是希望提供一个在群内下棋的环境，重要的是大家一起围观、交流和讨论棋局，而不是单纯实现对局。太多的对局同时进行不仅会导致群消息过多炸群，而且也不利于交流。如果只是需要下棋，chess.com 的邀请链接完全可以创建无限的棋局。<sub>~绝对不是开发者懒得写！！！~</sub>
+
+### 扫码登录时被风控如何处理
+
+如果服务器网络环境被风控，在本地执行后将生成的 device.json 及 session.token 上传至服务器即可。
 
 ## TODO
 
