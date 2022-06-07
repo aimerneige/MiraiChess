@@ -4,10 +4,20 @@
 
 使用 Mirai 框架实现的国际象棋机器人。
 
+## Language
+
+I assume that most of the users of this repo are Chinese, so there will be no English support for README and documents. If you need, post a issue.
+
 ## 如何使用
 
-项目还在开发中，目前还不能用的说。
+项目在开发中，还不能用的说。
 
-## About English
+## 手动构建
 
-I assume that most of the users of this repo are Chinese, so there will be no English support for README and documents.
+首先确保电脑上安装了必要的包
+
+```bash
+make all
+```
+
+完成后在 `./bin` 目录下会看到可执行文件。
