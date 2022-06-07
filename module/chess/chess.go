@@ -1,6 +1,7 @@
 package chess
 
 import (
+	"regexp"
 	"sync"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
@@ -64,8 +65,11 @@ func (c *chess) Serve(b *bot.Bot) {
 		case msgString == "draw" || msgString == "和棋":
 			replyMsg = service.Draw(msg.GroupCode, msg.Sender)
 		case []rune(msgString)[0] == '!' || []rune(msgString)[0] == '！':
-			move := string([]rune(msgString)[1:])
-			replyMsg = service.Play(c, msg.GroupCode, msg.Sender, move, logger)
+			moveStr := string([]rune(msgString)[1:])
+			if !isCorrectMoveStr(moveStr) {
+				return
+			}
+			replyMsg = service.Play(c, msg.GroupCode, msg.Sender, moveStr, logger)
 		default:
 			return
 		}
@@ -100,4 +104,13 @@ func isAllowedGroupCode(grpCode int64) bool {
 		}
 	}
 	return false
+}
+
+func isCorrectMoveStr(moveStr string) bool {
+	if len(moveStr) == 0 {
+		return false
+	}
+	const PATTERN = "([0-9]|[A-Z]|[a-z])+"
+	reg := regexp.MustCompile(moveStr)
+	return reg.MatchString(moveStr)
 }
