@@ -59,8 +59,14 @@ mv device.json ../
 nohup ./bin/mirai-chess-bot-linux-amd64-v0.0.1 &
 ```
 
-## 代办
+## TODO
 
 - [ ] 提供 service 文件
 - [ ] 提供 docker 支持
 - [ ] 完善文档
+
+## LICENSE
+
+<a href="https://www.gnu.org/licenses/agpl-3.0.en.html">
+<img src="https://www.gnu.org/graphics/agplv3-155x51.png">
+</a>
