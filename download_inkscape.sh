@@ -1,3 +1,4 @@
+#!/usr/bin/bash
 set -e
 rm ./bin/inkscape
 # get the latest release here: https://inkscape.org/release/
