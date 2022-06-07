@@ -25,7 +25,7 @@ cd MiraiChess
 ```
 
 执行脚本下载 inkscape：\
-:warning: 脚本中使用了相对路径，请一定在项目根目录下执行脚本。
+:warning: 脚本中使用了相对路径，请务必在项目根目录下执行脚本。
 
 ```bash
 ./scripts/download_inkscape.sh
