@@ -33,6 +33,8 @@ func (c *chess) MiraiGoModule() bot.ModuleInfo {
 // 在此处可以进行 Module 的初始化配置
 // 如配置读取
 func (c *chess) Init() {
+	// 读取配置文件并初始化 allowedGroup
+	// 咕咕咕
 }
 
 // PostInit 第二次初始化

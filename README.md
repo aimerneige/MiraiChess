@@ -10,14 +10,57 @@ I assume that most of the users of this repo are Chinese, so there will be no En
 
 ## 如何使用
 
-项目在开发中，还不能用的说。
+准备如下环境：
 
-## 手动构建
+1. Linux 服务器 （笔记本啥的也可以，关键要有 Linux 环境）
+2. [golang](https://go.dev/dl/)
+3. [make](https://www.gnu.org/software/make/)
 
-首先确保电脑上安装了必要的包
+将项目下载到本地：
+
+```bash
+git clone https://github.com/aimerneige/MiraiChess.git
+cd MiraiChess
+```
+
+执行脚本下载 inkscape：
+
+```bash
+./download_inkscape.sh
+```
+
+编译项目：
 
 ```bash
 make all
 ```
 
 完成后在 `./bin` 目录下会看到可执行文件。
+
+启动之前，先生成设备文件，并将生成的 `device.json` 移动到项目根目录下：
+
+```bash
+cd test
+go test
+mv device.json ../
+```
+
+适当修改 `./config` 下配置文件
+
+启动机器人
+
+```bash
+./bin/mirai-chess-bot-linux-amd64-v0.0.1
+```
+
+测试无误后可将其转为后台执行：
+
+```bash
+nohup ./bin/mirai-chess-bot-linux-amd64-v0.0.1 &
+```
+
+## 代办
+
+- [ ] 提供 service 文件
+- [ ] 提供 docker 支持
+- [ ] 完善文档
