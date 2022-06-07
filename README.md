@@ -26,7 +26,7 @@ cd MiraiChess
 执行脚本下载 inkscape：
 
 ```bash
-./download_inkscape.sh
+./scripts/download_inkscape.sh
 ```
 
 编译项目：
