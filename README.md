@@ -14,7 +14,8 @@ I assume that most of the users of this repo are Chinese, so there will be no En
 
 1. Linux 服务器 （笔记本啥的也可以，关键要有 Linux 环境）
 2. [golang](https://go.dev/dl/)
-3. [make](https://www.gnu.org/software/make/)
+3. [python](https://www.python.org/downloads/)
+4. [make](https://www.gnu.org/software/make/)
 
 将项目下载到本地：
 
@@ -27,6 +28,12 @@ cd MiraiChess
 
 ```bash
 ./scripts/download_inkscape.sh
+```
+
+安装 python 库 [python-chess](https://github.com/niklasf/python-chess)：
+
+```bash
+pip install python-chess
 ```
 
 编译项目：
