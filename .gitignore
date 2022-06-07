@@ -50,3 +50,6 @@ temp/*.svg
 ### config ###
 config/*.yaml
 config/*.yml
+
+### binary ###
+bin/inkscape
