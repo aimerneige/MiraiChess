@@ -76,7 +76,7 @@ func Draw(groupCode int64, sender *message.Sender) *message.SendingMessage {
 				return textWithAt(sender.Uin, "已发起和棋请求，请勿重复发送。")
 			}
 			delete(instance.gameRooms, groupCode)
-			return textWithAt(sender.Uin, "接受和棋，游戏结束。")
+			return textWithAt(sender.Uin, "接受和棋，游戏结束。"+room.chessGame.String())
 		}
 		return textWithAt(sender.Uin, "不是对局中的玩家，无法请求和棋。")
 	}
@@ -89,7 +89,7 @@ func Resign(groupCode int64, sender *message.Sender) *message.SendingMessage {
 		// 检查是否是当前游戏玩家
 		if sender.Uin == room.whitePlayer || sender.Uin == room.blackPlayer {
 			delete(instance.gameRooms, groupCode)
-			return textWithAt(sender.Uin, "认输，游戏结束。")
+			return textWithAt(sender.Uin, "认输，游戏结束。"+room.chessGame.String())
 		}
 		return textWithAt(sender.Uin, "不是对局中的玩家，无法认输。")
 	}
@@ -116,10 +116,10 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, move stri
 				return errorResetText()
 			}
 			if room.chessGame.Method() == chess.Stalemate {
-				return simpleText("游戏结束，逼和。").Append(boardImgEle)
+				return simpleText("游戏结束，逼和。" + room.chessGame.String()).Append(boardImgEle)
 			}
 			if room.chessGame.Method() == chess.Checkmate {
-				return simpleText("游戏结束，将杀。").Append(boardImgEle)
+				return simpleText("游戏结束，将杀。" + room.chessGame.String()).Append(boardImgEle)
 			}
 			var currentPlayer int64
 			if room.isWhite {
