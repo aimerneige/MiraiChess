@@ -1,14 +1,12 @@
 package service
 
 import (
-	"image/color"
 	"os"
 	"os/exec"
 
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/notnil/chess"
-	"github.com/notnil/chess/image"
 	"github.com/sirupsen/logrus"
 )
 
@@ -148,7 +146,7 @@ func textWithAt(target int64, msg string) *message.SendingMessage {
 
 func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLogger) (*message.GroupImageElement, bool) {
 	if room, ok := instance.gameRooms[groupCode]; ok {
-		if err := generateBoardSVG(room.chessGame.FEN()); err != nil {
+		if err := exec.Command("./module/chess/service/board_svg.py", room.chessGame.FEN(), svgFilePath).Run(); err != nil {
 			logger.WithError(err).Error("Unable to generate svg file.")
 			return nil, false
 		}
@@ -172,30 +170,4 @@ func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLog
 
 	logger.Debugf("No room for groupCode %d.", groupCode)
 	return nil, false
-}
-
-// generateBoardSVG generate board svg file
-func generateBoardSVG(fenStr string, sqs ...chess.Square) error {
-	os.Remove(svgFilePath)
-	f, err := os.Create(svgFilePath)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	pos := &chess.Position{}
-	if err := pos.UnmarshalText([]byte(fenStr)); err != nil {
-		return err
-	}
-	yellow := color.RGBA{255, 255, 0, 1}
-	mark := image.MarkSquares(yellow, sqs...)
-	board := pos.Board()
-	if pos.Turn() == chess.Black {
-		board = board.Flip(chess.UpDown).Flip(chess.LeftRight)
-	}
-	if err := image.SVG(f, board, mark); err != nil {
-		return err
-	}
-
-	return nil
 }
