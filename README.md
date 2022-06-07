@@ -76,13 +76,14 @@ nohup ./bin/mirai-chess-bot-linux-amd64-v0.0.1 &
 
 ### 扫码登录时被风控如何处理
 
-如果服务器网络环境被风控，在本地执行后将生成的 device.json 及 session.token 上传至服务器即可。
+如果服务器网络环境被风控，在本地执行后将生成的 `device.json` 及 `session.token` 上传至服务器即可。
 
 ## TODO
 
 - [ ] 提供 service 文件
 - [ ] 提供 docker 支持
-- [ ] 完善文档
+- [ ] 对局分析
+- [x] 完善文档
 
 ## LICENSE
 
