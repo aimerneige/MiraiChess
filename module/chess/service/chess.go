@@ -98,11 +98,12 @@ func Resign(groupCode int64, sender *message.Sender) *message.SendingMessage {
 // Play 走棋
 func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr string, logger logrus.FieldLogger) *message.SendingMessage {
 	if room, ok := instance.gameRooms[groupCode]; ok {
+		// 对局未建立
+		if sender.Uin == room.whitePlayer && room.blackPlayer == 0 {
+			return textWithAt(room.whitePlayer, "请等待其他玩家加入对局。")
+		}
 		// 检查消息发送者是否为对局中玩家
 		if sender.Uin == room.whitePlayer || sender.Uin == room.blackPlayer {
-			if sender.Uin == room.whitePlayer && room.blackPlayer == 0 {
-				return textWithAt(room.whitePlayer, "请等待其他玩家加入对局。")
-			}
 			if (sender.Uin == room.whitePlayer && !room.isWhite) || (sender.Uin == room.blackPlayer && room.isWhite) {
 				return textWithAt(sender.Uin, "请等待对手走棋。")
 			}
