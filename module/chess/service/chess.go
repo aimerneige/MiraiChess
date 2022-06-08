@@ -48,7 +48,7 @@ func Game(c *client.QQClient, groupCode int64, sender *message.Sender, logger lo
 		boardImgEle, ok := getBoardElement(c, groupCode, logger)
 		if !ok {
 			delete(instance.gameRooms, groupCode)
-			return errorResetText()
+			return errorResetText("无法生成棋盘图片。")
 		}
 		return simpleText("黑棋已加入对局，请白方下棋。").Append(message.NewAt(room.whitePlayer)).Append(boardImgEle)
 	}
@@ -98,47 +98,53 @@ func Resign(groupCode int64, sender *message.Sender) *message.SendingMessage {
 // Play 走棋
 func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr string, logger logrus.FieldLogger) *message.SendingMessage {
 	if room, ok := instance.gameRooms[groupCode]; ok {
+		// 不是对局中的玩家，忽略消息
+		if (sender.Uin != room.whitePlayer) && (sender.Uin != room.blackPlayer) {
+			// return textWithAt(sender.Uin, "您不是对局中的玩家，无法走棋。")
+			return nil
+		}
 		// 对局未建立
 		if sender.Uin == room.whitePlayer && room.blackPlayer == 0 {
-			return textWithAt(room.whitePlayer, "请等待其他玩家加入对局。")
+			return textWithAt(room.whitePlayer, "请等候其他玩家加入游戏。")
 		}
-		// 检查消息发送者是否为对局中玩家
-		if sender.Uin == room.whitePlayer || sender.Uin == room.blackPlayer {
-			if (sender.Uin == room.whitePlayer && !room.isWhite) || (sender.Uin == room.blackPlayer && room.isWhite) {
-				return textWithAt(sender.Uin, "请等待对手走棋。")
-			}
-			if err := room.chessGame.MoveStr(moveStr); err != nil {
-				return simpleText(fmt.Sprintf("移动“%s”违规，请检查格式以及是否被将，字符串格式请参考“代数记谱法”(Algebraic notation)", moveStr))
-			}
-			room.isWhite = !room.isWhite
+		// 需要对手走棋
+		if ((sender.Uin == room.whitePlayer) && (room.chessGame.Position().Turn() != chess.White)) || ((sender.Uin == room.blackPlayer) && (room.chessGame.Position().Turn() != chess.Black)) {
+			return textWithAt(sender.Uin, "请等待对手走棋。")
+		}
+		// 走棋
+		if err := room.chessGame.MoveStr(moveStr); err != nil {
+			return simpleText(fmt.Sprintf("移动“%s”违规，请检查，格式请参考“代数记谱法”(Algebraic notation)", moveStr))
+		}
+		// 走子之后，视为拒绝和棋
+		if room.drawPlayer != 0 {
 			room.drawPlayer = 0
 			instance.gameRooms[groupCode] = room
-			boardImgEle, ok := getBoardElement(c, groupCode, logger)
-			if !ok {
-				delete(instance.gameRooms, groupCode)
-				return errorResetText()
-			}
-			if room.chessGame.Method() == chess.Stalemate {
-				return simpleText("游戏结束，逼和。" + room.chessGame.String()).Append(boardImgEle)
-			}
-			if room.chessGame.Method() == chess.Checkmate {
-				return simpleText("游戏结束，将杀。" + room.chessGame.String()).Append(boardImgEle)
-			}
-			var currentPlayer int64
-			if room.isWhite {
-				currentPlayer = room.whitePlayer
-			} else {
-				currentPlayer = room.blackPlayer
-			}
-			return textWithAt(currentPlayer, "对手已走子，游戏继续。").Append(boardImgEle)
 		}
-		return textWithAt(sender.Uin, "您不是对局中的玩家，无法走棋。")
+		// 生成棋盘图片
+		boardImgEle, ok := getBoardElement(c, groupCode, logger)
+		if !ok {
+			delete(instance.gameRooms, groupCode)
+			return errorResetText("无法生成棋盘图片")
+		}
+		if room.chessGame.Method() == chess.Stalemate {
+			return simpleText("游戏结束，逼和。" + room.chessGame.String()).Append(boardImgEle)
+		}
+		if room.chessGame.Method() == chess.Checkmate {
+			return simpleText("游戏结束，将杀。" + room.chessGame.String()).Append(boardImgEle)
+		}
+		var currentPlayer int64
+		if room.chessGame.Position().Turn() == chess.White {
+			currentPlayer = room.whitePlayer
+		} else {
+			currentPlayer = room.blackPlayer
+		}
+		return textWithAt(currentPlayer, "对手已走子，游戏继续。").Append(boardImgEle)
 	}
 	return textWithAt(sender.Uin, "对局不存在，发送“下棋”或“chess”可创建对局。")
 }
 
-func errorResetText() *message.SendingMessage {
-	return simpleText("发生错误，对局已重置。请联系开发者修 bug。\n开源地址 https://github.com/aimerneige/MiariChess")
+func errorResetText(errMsg string) *message.SendingMessage {
+	return simpleText("发生错误，对局已重置。请联系开发者修 bug。\n开源地址 https://github.com/aimerneige/MiraiChess/issues\n错误信息：" + errMsg)
 }
 
 func simpleText(msg string) *message.SendingMessage {
