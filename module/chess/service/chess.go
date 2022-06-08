@@ -150,6 +150,9 @@ func simpleText(msg string) *message.SendingMessage {
 }
 
 func textWithAt(target int64, msg string) *message.SendingMessage {
+	if target == 0 {
+		return simpleText(msg)
+	}
 	return message.NewSendingMessage().Append(message.NewAt(target)).Append(message.NewText(msg))
 }
 
