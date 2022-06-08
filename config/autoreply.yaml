@@ -1,19 +1,17 @@
 help: |
-  指令说明：
-  指令支持中英文，括号内的为英文
-  参与/创建一盘游戏：下棋 (chess)
-  投降认输：认输 (resign)
-  请求、接受和棋：和棋 (draw)
-  走棋：!Nf3 中英文感叹号均可，格式请参考“代数记谱法”(Algebraic notation)
+  指令说明：（指令支持中英文）
+  参与/创建一盘游戏：「下棋」(chess)
+  投降认输：「认输」 (resign)
+  请求、接受和棋：「和棋」 (draw)
+  走棋：!Nxf3 中英文感叹号均可，格式请参考“代数记谱法”(Algebraic notation)
 
   本项目使用 AGPL-3.0 协议授权，开源地址 https://github.com/aimerneige/MiraiChess
 
 帮助: |
-  指令说明：
-  指令支持中英文，括号内的为英文
-  参与/创建一盘游戏：下棋 (chess)
-  投降认输：认输 (resign)
-  请求、接受和棋：和棋 (draw)
-  走棋：!Nf3 中英文感叹号均可，格式请参考“代数记谱法”(Algebraic notation)
+  指令说明：（指令支持中英文）
+  参与/创建一盘游戏：「下棋」(chess)
+  投降认输：「认输」 (resign)
+  请求、接受和棋：「和棋」 (draw)
+  走棋：!Nxf3 中英文感叹号均可，格式请参考“代数记谱法”(Algebraic notation)
 
   本项目使用 AGPL-3.0 协议授权，开源地址 https://github.com/aimerneige/MiraiChess
