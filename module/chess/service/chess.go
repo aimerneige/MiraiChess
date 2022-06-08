@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 
@@ -95,7 +96,7 @@ func Resign(groupCode int64, sender *message.Sender) *message.SendingMessage {
 }
 
 // Play 走棋
-func Play(c *client.QQClient, groupCode int64, sender *message.Sender, move string, logger logrus.FieldLogger) *message.SendingMessage {
+func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr string, logger logrus.FieldLogger) *message.SendingMessage {
 	if room, ok := instance.gameRooms[groupCode]; ok {
 		// 检查消息发送者是否为对局中玩家
 		if sender.Uin == room.whitePlayer || sender.Uin == room.blackPlayer {
@@ -105,8 +106,8 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, move stri
 			if (sender.Uin == room.whitePlayer && !room.isWhite) || (sender.Uin == room.blackPlayer && room.isWhite) {
 				return textWithAt(sender.Uin, "请等待对手走棋。")
 			}
-			if err := room.chessGame.MoveStr(move); err != nil {
-				return simpleText("该移动违规，请检查格式以及是否被将，字符串格式请参考“代数记谱法”(Algebraic notation)")
+			if err := room.chessGame.MoveStr(moveStr); err != nil {
+				return simpleText(fmt.Sprintf("移动“%s”违规，请检查格式以及是否被将，字符串格式请参考“代数记谱法”(Algebraic notation)", moveStr))
 			}
 			room.isWhite = !room.isWhite
 			room.drawPlayer = 0
