@@ -4,6 +4,10 @@
 
 使用 [MiraiGo-Template](https://github.com/Logiase/MiraiGo-Template) 实现的国际象棋机器人。
 
+![](img/chess-girl.jpg)
+
+图源：<https://www.pixiv.net/en/artworks/90731304>
+
 ## Language
 
 I assume that most of the users of this repo are Chinese, so there will be no English support for README and documents. If you need, post a issue.
