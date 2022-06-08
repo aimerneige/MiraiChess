@@ -99,11 +99,14 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, move stri
 	if room, ok := instance.gameRooms[groupCode]; ok {
 		// 检查消息发送者是否为对局中玩家
 		if sender.Uin == room.whitePlayer || sender.Uin == room.blackPlayer {
+			if sender.Uin == room.whitePlayer && room.blackPlayer == 0 {
+				return textWithAt(room.whitePlayer, "请等待其他玩家加入对局。")
+			}
 			if (sender.Uin == room.whitePlayer && !room.isWhite) || (sender.Uin == room.blackPlayer && room.isWhite) {
 				return textWithAt(sender.Uin, "请等待对手走棋。")
 			}
 			if err := room.chessGame.MoveStr(move); err != nil {
-				return simpleText("走棋不合法！")
+				return simpleText("该移动违规，请检查格式以及是否被将，字符串格式请参考“代数记谱法”(Algebraic notation)")
 			}
 			room.isWhite = !room.isWhite
 			room.drawPlayer = 0
