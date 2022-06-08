@@ -25,7 +25,6 @@ type chessRoom struct {
 	whitePlayer int64
 	blackPlayer int64
 	drawPlayer  int64
-	isWhite     bool
 }
 
 func init() {
@@ -57,7 +56,6 @@ func Game(c *client.QQClient, groupCode int64, sender *message.Sender, logger lo
 		whitePlayer: sender.Uin,
 		blackPlayer: 0,
 		drawPlayer:  0,
-		isWhite:     true,
 	}
 	return simpleText("已创建新的对局，发送“下棋”或“chess”可加入对局。")
 }
@@ -104,7 +102,7 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 			return nil
 		}
 		// 对局未建立
-		if sender.Uin == room.whitePlayer && room.blackPlayer == 0 {
+		if room.blackPlayer == 0 {
 			return textWithAt(room.whitePlayer, "请等候其他玩家加入游戏。")
 		}
 		// 需要对手走棋
