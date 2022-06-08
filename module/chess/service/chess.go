@@ -102,8 +102,8 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 			return nil
 		}
 		// 对局未建立
-		if room.blackPlayer == 0 {
-			return textWithAt(room.whitePlayer, "请等候其他玩家加入游戏。")
+		if (room.whitePlayer == 0) || (room.blackPlayer == 0) {
+			return textWithAt(sender.Uin, "请等候其他玩家加入游戏。")
 		}
 		// 需要对手走棋
 		if ((sender.Uin == room.whitePlayer) && (room.chessGame.Position().Turn() != chess.White)) || ((sender.Uin == room.blackPlayer) && (room.chessGame.Position().Turn() != chess.Black)) {
