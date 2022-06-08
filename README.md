@@ -67,7 +67,7 @@ mv device.json ../
 nohup ./bin/mirai-chess-bot-linux-amd64-v0.0.1 &
 ```
 
-## FAQ
+## Q&A
 
 ### 是否会支持群内多盘对局同时进行
 
