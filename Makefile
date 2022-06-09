@@ -4,7 +4,10 @@ GOOS		?= linux
 GOARCH		?= amd64
 VERSION		?= v0.0.1
 
-.PHONY: all clean updatedep
+.PHONY: run all clean updatedep
+
+run: all
+	./bin/mirai-chess-bot-linux-amd64-v0.0.1
 
 all: bin/mirai-chess-bot-$(GOOS)-$(GOARCH)-$(VERSION)
 

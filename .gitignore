@@ -49,3 +49,6 @@ temp/*.svg
 
 ### binary ###
 bin/inkscape
+
+### qrcode ###
+qrcode.png
