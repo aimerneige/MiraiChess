@@ -82,6 +82,10 @@ nohup ./bin/mirai-chess-bot-linux-amd64-v0.0.1 &
 
 如果服务器网络环境被风控，在本地执行后将生成的 `device.json` 及 `session.token` 上传至服务器即可。
 
+### 是否支持 Windows
+
+项目代码本身可以编译 Windows 版本，但在 svg 转 png 时用到了 [inkscape](https://inkscape.org/)，该软件提供 Windows 版本但本项目没有测试其可用性，如果您有这方面的需求，可以尝试在 Windows 下调用 inkscape 或重写 svg 转 png 的相关代码。（PR WELCOME）
+
 ## TODO
 
 - [ ] 提供 service 文件
