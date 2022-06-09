@@ -21,5 +21,6 @@ if __name__ == "__main__":
     args = sys.argv
     if len(args) != 3:
         print("wrong args")
+        exit(1)
     generate_board_svg(fen_str=args[1], file_path=args[2])
     exit(0)
