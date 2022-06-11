@@ -40,14 +40,9 @@ cd MiraiChess
 make all
 ```
 
-完成后在 `./bin` 目录下会看到可执行文件。
+编译完成后在 `./bin` 目录下会看到可执行文件。
 
-启动之前，先生成设备文件，并将生成的 `device.json` 移动到项目根目录下：
-
-```bash
-go test ./test
-mv device.json ../
-```
+编译过程中会自动下载 inkscape 并生成随机设备文件。
 
 适当修改 `./config` 下配置文件
 
