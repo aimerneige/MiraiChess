@@ -7,10 +7,10 @@ VERSION		?= v0.0.1
 .PHONY: run all fmt clean updatedep
 
 run: all
-	./bin/mirai-chess-bot-linux-amd64-v0.0.1
+	./bin/mirai-chess-bot-$(GOOS)-$(GOARCH)-$(VERSION)
 
 release: all
-	./scripts/release.sh
+	./scripts/release.sh $(VERSION)
 
 all: bin/mirai-chess-bot-$(GOOS)-$(GOARCH)-$(VERSION) inkscape device
 
