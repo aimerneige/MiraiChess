@@ -17,7 +17,7 @@ mkdir ./release/$TARGET
 mkdir ./release/$TARGET/bin
 cp ./bin/device ./release/$TARGET/bin
 cp ./bin/inkscape ./release/$TARGET/bin
-cp ./bin/mirai-chess-bot-linux-amd64-$VERSION ./release/$TARGET/bin
+cp ./bin/mirai-chess-bot-linux-amd64-$VERSION ./release/$TARGET/bin/bot
 
 mkdir ./release/$TARGET/config
 cp ./config/*.yaml ./release/$TARGET/config
