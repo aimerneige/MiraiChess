@@ -9,7 +9,7 @@ DEVICE_FILE="./device.json"
 
 if [ -f $DEVICE_FILE ]
 then
-    printf "${GREEN}Device already exist. Skiped.\n${NC}"
+    printf "${GREEN}Device file already exist. Skiped.\n${NC}"
 else
     printf "${GREEN}Start to generate devive file.\n${NC}"
     ./bin/device
