@@ -45,8 +45,7 @@ make all
 启动之前，先生成设备文件，并将生成的 `device.json` 移动到项目根目录下：
 
 ```bash
-cd test
-go test
+go test ./test
 mv device.json ../
 ```
 
