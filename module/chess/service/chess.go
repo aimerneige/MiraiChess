@@ -162,7 +162,7 @@ func textWithAt(target int64, msg string) *message.SendingMessage {
 
 func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLogger) (*message.GroupImageElement, bool) {
 	if room, ok := instance.gameRooms[groupCode]; ok {
-		if err := exec.Command("./module/chess/service/board_svg.py", room.chessGame.FEN(), svgFilePath).Run(); err != nil {
+		if err := exec.Command("./scripts/board2svg.py", room.chessGame.FEN(), svgFilePath).Run(); err != nil {
 			logger.WithError(err).Error("Unable to generate svg file.")
 			return nil, false
 		}

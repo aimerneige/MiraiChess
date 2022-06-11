@@ -21,24 +21,17 @@ I assume that most of the users of this repo are Chinese, so there will be no En
 3. [python](https://www.python.org/downloads/)
 4. [make](https://www.gnu.org/software/make/)
 
+安装 python 库 [python-chess](https://github.com/niklasf/python-chess)：
+
+```bash
+pip install python-chess
+```
+
 将项目下载到本地：
 
 ```bash
 git clone https://github.com/aimerneige/MiraiChess.git
 cd MiraiChess
-```
-
-执行脚本下载 inkscape：\
-:warning: 脚本中使用了相对路径，请务必在项目根目录下执行脚本。
-
-```bash
-./scripts/download_inkscape.sh
-```
-
-安装 python 库 [python-chess](https://github.com/niklasf/python-chess)：
-
-```bash
-pip install python-chess
 ```
 
 编译项目：
