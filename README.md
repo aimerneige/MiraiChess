@@ -17,9 +17,7 @@ I assume that most of the users of this repo are Chinese, so there will be no En
 准备如下环境：
 
 1. Linux 服务器 （笔记本啥的也可以，关键要有 Linux 环境）
-2. [golang](https://go.dev/dl/)
-3. [python](https://www.python.org/downloads/)
-4. [make](https://www.gnu.org/software/make/)
+2. [python](https://www.python.org/downloads/)
 
 安装 python 库 [python-chess](https://github.com/niklasf/python-chess)：
 
@@ -27,35 +25,46 @@ I assume that most of the users of this repo are Chinese, so there will be no En
 pip install python-chess
 ```
 
-将项目下载到本地：
+下载最新 release 或 自己编译。
+
+解压 release：
 
 ```bash
-git clone https://github.com/aimerneige/MiraiChess.git
-cd MiraiChess
+tar -xzvf MiraiChess-linux-amd64-v0.0.1.tar.gz
 ```
 
-编译项目：
+适当修改 `./config` 下配置文件。
+
+启动项目：
+
+```bash
+./start.sh
+```
+
+## 如何编译
+
+环境依赖：
+
+1. [golang](https://go.dev/dl/)
+2. [python](https://www.python.org/downloads/)
+3. [make](https://www.gnu.org/software/make/)
+
+编译可执行文件：
 
 ```bash
 make all
 ```
 
-编译完成后在 `./bin` 目录下会看到可执行文件。
-
-编译过程中会自动下载 inkscape 并生成随机设备文件。
-
-适当修改 `./config` 下配置文件
-
-启动机器人
+发布 release：
 
 ```bash
-./bin/mirai-chess-bot-linux-amd64-v0.0.1
+make release
 ```
 
-测试无误后可将其转为后台执行：
+测试运行：
 
 ```bash
-nohup ./bin/mirai-chess-bot-linux-amd64-v0.0.1 &
+make run
 ```
 
 ## Q&A
@@ -77,7 +86,6 @@ nohup ./bin/mirai-chess-bot-linux-amd64-v0.0.1 &
 
 - [ ] 提供 service 文件
 - [ ] 提供 docker 支持
-- [ ] 对局分析
 - [x] 完善文档
 
 ## LICENSE
@@ -94,5 +102,6 @@ nohup ./bin/mirai-chess-bot-linux-amd64-v0.0.1 &
 ## 开源相关
 
 - [MiraiGo-Template](https://github.com/Logiase/MiraiGo-Template)
+- [MiraiGo-module-autoreply](https://github.com/Logiase/MiraiGo-module-autoreply)
 - [chess](https://github.com/notnil/chess)
 - [python-chess](https://github.com/niklasf/python-chess)
