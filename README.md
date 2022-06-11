@@ -4,7 +4,7 @@
 
 使用 [MiraiGo-Template](https://github.com/Logiase/MiraiGo-Template) 实现的国际象棋机器人。
 
-<img src="https://raw.githubusercontent.com/aimerneige/MiraiChess/master/img/chess-girl.jpg" alt="anime girl" width="360" height="480">
+<img src="https://raw.githubusercontent.com/aimerneige/MiraiChess/master/img/chess-girl.jpg" alt="anime girl" width="360" height="360">
 
 图源：<https://www.pixiv.net/en/artworks/90731304>
 
