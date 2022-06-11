@@ -2,7 +2,7 @@ GO			:= go
 GO_SOURCES	:= $(shell find . -name "*.go" -type f)
 GOOS		?= linux
 GOARCH		?= amd64
-VERSION		?= v0.0.1
+VERSION		?= v1.0.0
 
 .PHONY: run all fmt clean updatedep
 

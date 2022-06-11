@@ -30,7 +30,7 @@ pip install python-chess
 解压 release：
 
 ```bash
-tar -xzvf MiraiChess-linux-amd64-v0.0.1.tar.gz
+tar -xzvf MiraiChess-linux-amd64-v1.0.0.tar.gz
 ```
 
 适当修改 `./config` 下配置文件。
