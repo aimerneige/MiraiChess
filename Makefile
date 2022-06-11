@@ -9,6 +9,9 @@ VERSION		?= v0.0.1
 run: all
 	./bin/mirai-chess-bot-linux-amd64-v0.0.1
 
+release: all
+	./scripts/release.sh
+
 all: bin/mirai-chess-bot-$(GOOS)-$(GOARCH)-$(VERSION) inkscape device
 
 inkscape:
