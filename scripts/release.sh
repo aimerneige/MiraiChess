@@ -11,7 +11,6 @@ mkdir ./release/$TARGET
 
 mkdir ./release/$TARGET/bin
 cp ./bin/device ./release/$TARGET/bin
-cp ./bin/inkscape ./release/$TARGET/bin
 cp ./bin/mirai-chess-bot-linux-amd64-$VERSION ./release/$TARGET/bin/bot
 
 mkdir ./release/$TARGET/config
@@ -21,6 +20,7 @@ mkdir ./release/$TARGET/logs
 
 mkdir ./release/$TARGET/scripts
 cp ./scripts/board2svg.py ./release/$TARGET/scripts
+cp ./scripts/download_inkscape.sh ./release/$TARGET/scripts
 cp ./scripts/start.sh ./release/$TARGET
 
 mkdir ./release/$TARGET/temp
