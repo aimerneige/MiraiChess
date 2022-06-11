@@ -34,6 +34,8 @@ cp LICENSE ./release/$TARGET/LICENSE
 
 cp README.md ./release/$TARGET/README.md
 
+echo "Here to get source code: https://github.com/aimerneige/MiraiChess." > ./release/$TARGET/src.txt
+
 printf "${GREEN}Start compress release package.\n${NC}"
 tar -C ./release/$TARGET -czvf ./release/$TARGET.tar.gz .
 
