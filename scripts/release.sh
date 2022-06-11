@@ -7,11 +7,6 @@ NC='\033[0m' # No Color
 TARGET="MiraiChess-linux-amd64-${VERSION}"
 
 printf "${GREEN}Start make release of version ${VERSION}.\n${NC}"
-
-printf "${GREEN}Start building project.\n${NC}"
-make all
-
-printf "${GREEN}Start copy files.\n${NC}"
 mkdir ./release/$TARGET
 
 mkdir ./release/$TARGET/bin
@@ -36,7 +31,6 @@ cp README.md ./release/$TARGET/README.md
 
 echo "Here to get source code: https://github.com/aimerneige/MiraiChess." > ./release/$TARGET/src.txt
 
-printf "${GREEN}Start compress release package.\n${NC}"
 tar -C ./release/$TARGET -czvf ./release/$TARGET.tar.gz .
 
 printf "${GREEN}Start clean temp files.\n${NC}"
