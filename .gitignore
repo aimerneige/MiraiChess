@@ -55,4 +55,4 @@ bin/device
 qrcode.png
 
 ### release ###
-./release/*.tar.gz
+release/*.tar.gz
