@@ -25,7 +25,7 @@ I assume that most of the users of this repo are Chinese, so there will be no En
 pip install python-chess
 ```
 
-下载最新 release 或 自己编译。
+下载最新 [release](https://github.com/aimerneige/MiraiChess/releases) 或 [自己编译](https://github.com/aimerneige/MiraiChess#%E5%A6%82%E4%BD%95%E7%BC%96%E8%AF%91)。
 
 解压 release：
 
