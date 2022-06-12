@@ -64,10 +64,19 @@ func Game(c *client.QQClient, groupCode int64, sender *message.Sender, logger lo
 func Draw(groupCode int64, sender *message.Sender) *message.SendingMessage {
 	if room, ok := instance.gameRooms[groupCode]; ok {
 		if sender.Uin == room.whitePlayer || sender.Uin == room.blackPlayer {
+			// 检查有无强制和棋
+			if err := room.chessGame.Draw(chess.ThreefoldRepetition); err != nil {
+				delete(instance.gameRooms, groupCode)
+				return simpleText("游戏结束，和棋，因为三次重复走子。\n" + room.chessGame.String())
+			}
+			if err := room.chessGame.Draw(chess.FiftyMoveRule); err != nil {
+				delete(instance.gameRooms, groupCode)
+				return simpleText("游戏结束，和棋，因为五十步规则。\n" + room.chessGame.String())
+			}
 			if room.drawPlayer == 0 {
 				room.drawPlayer = sender.Uin
 				instance.gameRooms[groupCode] = room
-				return textWithAt(sender.Uin, "请求和棋，发送“和棋”或“draw”接受和棋。")
+				return textWithAt(sender.Uin, "请求和棋，发送“和棋”或“draw”接受和棋。走棋视为拒绝和棋。")
 			}
 			if room.drawPlayer == sender.Uin {
 				return textWithAt(sender.Uin, "已发起和棋请求，请勿重复发送。")
@@ -98,7 +107,6 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 	if room, ok := instance.gameRooms[groupCode]; ok {
 		// 不是对局中的玩家，忽略消息
 		if (sender.Uin != room.whitePlayer) && (sender.Uin != room.blackPlayer) {
-			// return textWithAt(sender.Uin, "您不是对局中的玩家，无法走棋。")
 			return nil
 		}
 		// 对局未建立
@@ -124,16 +132,33 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 			delete(instance.gameRooms, groupCode)
 			return errorResetText("无法生成棋盘图片")
 		}
-		if room.chessGame.Method() == chess.Stalemate {
+		// 检查游戏是否结束
+		if room.chessGame.Method() != chess.NoMethod {
+			msg := "游戏结束，"
+			switch room.chessGame.Method() {
+			case chess.FivefoldRepetition:
+				msg += "和棋，因为五次重复走子。\n"
+			case chess.SeventyFiveMoveRule:
+				msg += "和棋，因为七十五步规则。\n"
+			case chess.InsufficientMaterial:
+				msg += "和棋，因为不可能将死。\n"
+			case chess.Stalemate:
+				msg += "和棋，因为逼和（无子可动和棋）。\n"
+			case chess.Checkmate:
+				var winner string
+				if room.chessGame.Position().Turn() == chess.White {
+					winner = "黑方"
+				} else {
+					winner = "白方"
+				}
+				msg += winner
+				msg += "胜利，因为将杀。\n"
+			}
 			chessString := room.chessGame.String()
 			delete(instance.gameRooms, groupCode)
-			return simpleText("游戏结束，逼和。\n" + chessString).Append(boardImgEle)
+			return simpleText(msg + chessString).Append(boardImgEle)
 		}
-		if room.chessGame.Method() == chess.Checkmate {
-			chessString := room.chessGame.String()
-			delete(instance.gameRooms, groupCode)
-			return simpleText("游戏结束，将杀。\n" + chessString).Append(boardImgEle)
-		}
+		// 提示玩家继续游戏
 		var currentPlayer int64
 		if room.chessGame.Position().Turn() == chess.White {
 			currentPlayer = room.whitePlayer
@@ -162,20 +187,33 @@ func textWithAt(target int64, msg string) *message.SendingMessage {
 
 func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLogger) (*message.GroupImageElement, bool) {
 	if room, ok := instance.gameRooms[groupCode]; ok {
-		if err := exec.Command("./scripts/board2svg.py", room.chessGame.FEN(), svgFilePath).Run(); err != nil {
+		var uciStr string
+		// 将最后一步走子转化为 uci 字符串
+		moves := room.chessGame.Moves()
+		if len(moves) != 0 {
+			uciStr = moves[len(moves)-1].String()
+		} else {
+			uciStr = "None"
+		}
+		// 调用 python 脚本生成 svg 文件
+		if err := exec.Command("./scripts/board2svg.py", room.chessGame.FEN(), svgFilePath, uciStr).Run(); err != nil {
+			logger.Info("./scripts/board2svg.py", " ", room.chessGame.FEN(), " ", svgFilePath, " ", uciStr)
 			logger.WithError(err).Error("Unable to generate svg file.")
 			return nil, false
 		}
+		// 调用 inkscape 将 svg 图片转化为 png 图片
 		if err := exec.Command("./bin/inkscape", "-w", "720", "-h", "720", svgFilePath, "-o", pngFilePath).Run(); err != nil {
 			logger.WithError(err).Error("Unable to convert to png.")
 			return nil, false
 		}
+		// 尝试读取 png 图片
 		f, err := os.Open(pngFilePath)
 		if err != nil {
 			logger.WithError(err).Errorf("Unable to read open image file in %s.", pngFilePath)
 			return nil, false
 		}
 		defer f.Close()
+		// 上传图片并返回
 		ele, err := c.UploadGroupImage(groupCode, f)
 		if err != nil {
 			logger.WithError(err).Error("Unable to upload image.")
