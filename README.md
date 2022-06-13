@@ -4,6 +4,10 @@
 
 使用 [MiraiGo-Template](https://github.com/Logiase/MiraiGo-Template) 实现的国际象棋机器人。
 
+![GitHub All Releases](https://img.shields.io/github/downloads/aimerneige/MiraiChess/total)
+![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/aimerneige/MiraiChess?label=release)
+![GitHub stars](https://img.shields.io/github/stars/aimerneige/MiraiChess)
+
 <img src="https://raw.githubusercontent.com/aimerneige/MiraiChess/master/img/bot.png" alt="bot">
 
 ## Language
