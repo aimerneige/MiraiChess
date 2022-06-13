@@ -28,15 +28,39 @@ pip install python-chess
 解压 release：
 
 ```bash
-tar -xzvf MiraiChess-linux-amd64-v1.1.0.tar.gz
+tar -xzvf MiraiChess-linux-amd64-v1.1.0.tar.gz -C /opt/MiraiChess
+cd /opt/MiraiChess
 ```
 
-适当修改 `./config` 下配置文件。
+按需适当修改 `./config` 下配置文件：
 
-启动项目：
+```
+vim ./config/application.yaml
+vim ./config/autoreply.yaml
+```
+
+运行启动脚本，确保机器人正常运行（必需）：
 
 ```bash
 ./start.sh
+```
+
+机器人运行无误后，可以安装 service 文件：
+
+```bash
+cp ./mirai-chess.service /etc/systemd/system/mirai-chess.service
+```
+
+启动机器人：
+
+```bash
+systemctl start mirai-chess.service
+```
+
+开机自启：
+
+```bash
+systemctl enable mirai-chess.service
 ```
 
 ## 如何编译
