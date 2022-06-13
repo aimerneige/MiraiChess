@@ -28,7 +28,7 @@ pip install python-chess
 解压 release：
 
 ```bash
-tar -xzvf MiraiChess-linux-amd64-v1.1.0.tar.gz -C /opt/MiraiChess
+tar -xzvf MiraiChess-linux-amd64-v1.1.1.tar.gz -C /opt/MiraiChess
 cd /opt/MiraiChess
 ```
 
