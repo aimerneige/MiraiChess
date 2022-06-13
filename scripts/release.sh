@@ -27,6 +27,8 @@ mkdir ./release/$TARGET/temp
 
 cp LICENSE ./release/$TARGET/LICENSE
 
+cp mirai-chess.service ./release/$TARGET/mirai-chess.service
+
 cp README.md ./release/$TARGET/README.md
 
 echo "Here to get source code: https://github.com/aimerneige/MiraiChess." > ./release/$TARGET/src.txt

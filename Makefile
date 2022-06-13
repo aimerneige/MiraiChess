@@ -4,15 +4,15 @@ GOOS		?= linux
 GOARCH		?= amd64
 VERSION		?= v1.1.0
 
-.PHONY: run all fmt clean updatedep
+.PHONY: run release build fmt clean updatedep
 
-run: all
+run: build
 	./bin/mirai-chess-bot-$(GOOS)-$(GOARCH)-$(VERSION)
 
-release: all
+release: build
 	./scripts/release.sh $(VERSION)
 
-all: bin/mirai-chess-bot-$(GOOS)-$(GOARCH)-$(VERSION) inkscape device
+build: bin/mirai-chess-bot-$(GOOS)-$(GOARCH)-$(VERSION) inkscape device
 
 inkscape:
 	./scripts/download_inkscape.sh

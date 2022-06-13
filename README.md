@@ -52,7 +52,7 @@ tar -xzvf MiraiChess-linux-amd64-v1.1.0.tar.gz
 编译可执行文件：
 
 ```bash
-make all
+make build
 ```
 
 发布 release：
