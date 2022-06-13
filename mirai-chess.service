@@ -1,0 +1,13 @@
+[Unit]
+Description=Mirai Chess Service
+After=network.target
+
+[Service]
+Type=simple
+Restart=on-failure
+RestartSec=5s
+ExecStart=/opt/MiraiChess/bin/bot
+WorkingDirectory=/opt/MiraiChess
+
+[Install]
+WantedBy=multi-user.target

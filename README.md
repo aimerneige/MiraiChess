@@ -84,7 +84,7 @@ make run
 
 ## TODO
 
-- [ ] 提供 service 文件
+- [x] 提供 service 文件
 - [ ] 提供 docker 支持
 - [x] 完善文档
 
