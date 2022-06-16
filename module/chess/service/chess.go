@@ -64,15 +64,6 @@ func Game(c *client.QQClient, groupCode int64, sender *message.Sender, logger lo
 func Draw(groupCode int64, sender *message.Sender) *message.SendingMessage {
 	if room, ok := instance.gameRooms[groupCode]; ok {
 		if sender.Uin == room.whitePlayer || sender.Uin == room.blackPlayer {
-			// 检查有无强制和棋
-			if err := room.chessGame.Draw(chess.ThreefoldRepetition); err != nil {
-				delete(instance.gameRooms, groupCode)
-				return simpleText("游戏结束，和棋，因为三次重复走子。\n" + room.chessGame.String())
-			}
-			if err := room.chessGame.Draw(chess.FiftyMoveRule); err != nil {
-				delete(instance.gameRooms, groupCode)
-				return simpleText("游戏结束，和棋，因为五十步规则。\n" + room.chessGame.String())
-			}
 			if room.drawPlayer == 0 {
 				room.drawPlayer = sender.Uin
 				instance.gameRooms[groupCode] = room
