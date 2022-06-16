@@ -70,6 +70,8 @@ func (c *chess) Serve(b *bot.Bot) {
 				return
 			}
 			replyMsg = service.Play(c, msg.GroupCode, msg.Sender, moveStr, logger)
+		case msgString == "cheese":
+			replyMsg = service.Cheese(c, msg.GroupCode, logger)
 		default:
 			return
 		}

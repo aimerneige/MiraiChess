@@ -12,7 +12,7 @@ import (
 )
 
 const svgFilePath = "./temp/board.svg"
-const pngFilePath = "./temp/board.png"
+const cheeseFilePath = "./temp/board.png"
 
 var instance *chessService
 
@@ -161,6 +161,25 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 	return textWithAt(sender.Uin, "对局不存在，发送“下棋”或“chess”可创建对局。")
 }
 
+// Cheese Easter Egg
+func Cheese(c *client.QQClient, groupCode int64, logger logrus.FieldLogger) *message.SendingMessage {
+	cheeseFilePath := "./img/cheese.jpeg"
+	// 读取图片
+	f, err := os.Open(cheeseFilePath)
+	if err != nil {
+		logger.WithError(err).Errorf("Unable to read open image file in %s.", cheeseFilePath)
+		return nil
+	}
+	defer f.Close()
+	// 上传图片
+	ele, err := c.UploadGroupImage(groupCode, f)
+	if err != nil {
+		logger.WithError(err).Error("Unable to upload image.")
+		return nil
+	}
+	return simpleText("Chess Cheese Cheese Chess").Append(ele)
+}
+
 func errorResetText(errMsg string) *message.SendingMessage {
 	return simpleText("发生错误，对局已重置。请联系开发者修 bug。\n开源地址 https://github.com/aimerneige/MiraiChess/issues\n错误信息：" + errMsg)
 }
@@ -193,14 +212,14 @@ func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLog
 			return nil, false
 		}
 		// 调用 inkscape 将 svg 图片转化为 png 图片
-		if err := exec.Command("./bin/inkscape", "-w", "720", "-h", "720", svgFilePath, "-o", pngFilePath).Run(); err != nil {
+		if err := exec.Command("./bin/inkscape", "-w", "720", "-h", "720", svgFilePath, "-o", cheeseFilePath).Run(); err != nil {
 			logger.WithError(err).Error("Unable to convert to png.")
 			return nil, false
 		}
 		// 尝试读取 png 图片
-		f, err := os.Open(pngFilePath)
+		f, err := os.Open(cheeseFilePath)
 		if err != nil {
-			logger.WithError(err).Errorf("Unable to read open image file in %s.", pngFilePath)
+			logger.WithError(err).Errorf("Unable to read open image file in %s.", cheeseFilePath)
 			return nil, false
 		}
 		defer f.Close()

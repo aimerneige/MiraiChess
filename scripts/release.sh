@@ -16,6 +16,9 @@ cp ./bin/mirai-chess-bot-linux-amd64-$VERSION ./release/$TARGET/bin/bot
 mkdir ./release/$TARGET/config
 cp ./config/*.yaml ./release/$TARGET/config
 
+mkdir ./release/$TARGET/img
+cp ./img/cheese.jpeg ./release/$TARGET/img
+
 mkdir ./release/$TARGET/logs
 
 mkdir ./release/$TARGET/scripts
