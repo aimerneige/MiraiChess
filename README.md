@@ -40,7 +40,7 @@ vim ./config/application.yaml
 vim ./config/autoreply.yaml
 ```
 
-运行启动脚本，确保机器人正常运行（必需）：
+运行启动脚本，下载依赖并确保机器人正常运行（必需）：
 
 ```bash
 ./start.sh
