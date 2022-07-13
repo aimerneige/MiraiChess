@@ -2,6 +2,7 @@ package chess
 
 import (
 	"regexp"
+	"strings"
 	"sync"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
@@ -66,6 +67,7 @@ func (c *chess) Serve(b *bot.Bot) {
 			replyMsg = service.Draw(msg.GroupCode, msg.Sender)
 		case []rune(msgString)[0] == '!' || []rune(msgString)[0] == '！':
 			moveStr := string([]rune(msgString)[1:])
+			moveStr = strings.TrimSpace(moveStr)
 			if !isCorrectMoveStr(moveStr) {
 				return
 			}
