@@ -12,7 +12,7 @@ import (
 )
 
 var instance *chess
-var logger = utils.GetModuleLogger("internal.logging")
+var logger = utils.GetModuleLogger("aimerneige.chess")
 var allowedGroup []int64
 
 type chess struct {
