@@ -107,6 +107,10 @@ make run
 
 项目代码本身可以编译 Windows 版本，但在 svg 转 png 时用到了 [inkscape](https://inkscape.org/)，该软件提供 Windows 版本但本项目没有测试其可用性，如果您有这方面的需求，可以尝试在 Windows 下调用 inkscape 或重写 svg 转 png 的相关代码。（PR WELCOME）
 
+## 加群调戏
+
+![857066811](img/qr-code.png)
+
 ## TODO
 
 - [x] 提供 service 文件
