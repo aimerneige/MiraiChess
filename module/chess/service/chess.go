@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"time"
 
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
@@ -23,7 +24,9 @@ type chessService struct {
 type chessRoom struct {
 	chessGame   *chess.Game
 	whitePlayer int64
+	whiteName   string
 	blackPlayer int64
+	blackName   string
 	drawPlayer  int64
 }
 
@@ -43,6 +46,7 @@ func Game(c *client.QQClient, groupCode int64, sender *message.Sender, logger lo
 			return textWithAt(sender.Uin, "请等候其他玩家加入游戏。")
 		}
 		room.blackPlayer = sender.Uin
+		room.blackName = sender.Nickname
 		instance.gameRooms[groupCode] = room
 		boardImgEle, ok, errMsg := getBoardElement(c, groupCode, logger)
 		if !ok {
@@ -53,7 +57,9 @@ func Game(c *client.QQClient, groupCode int64, sender *message.Sender, logger lo
 	instance.gameRooms[groupCode] = chessRoom{
 		chessGame:   chess.NewGame(),
 		whitePlayer: sender.Uin,
+		whiteName:   sender.Nickname,
 		blackPlayer: 0,
+		blackName:   "",
 		drawPlayer:  0,
 	}
 	return simpleText("已创建新的对局，发送“下棋”或“chess”可加入对局。")
@@ -71,8 +77,10 @@ func Draw(groupCode int64, sender *message.Sender) *message.SendingMessage {
 			if room.drawPlayer == sender.Uin {
 				return textWithAt(sender.Uin, "已发起和棋请求，请勿重复发送。")
 			}
+			room.chessGame.Draw(chess.DrawOffer)
+			chessString := getChessString(room)
 			delete(instance.gameRooms, groupCode)
-			return textWithAt(sender.Uin, "接受和棋，游戏结束。\n"+room.chessGame.String())
+			return textWithAt(sender.Uin, "接受和棋，游戏结束。\n"+chessString)
 		}
 		return textWithAt(sender.Uin, "不是对局中的玩家，无法请求和棋。")
 	}
@@ -84,8 +92,10 @@ func Resign(groupCode int64, sender *message.Sender) *message.SendingMessage {
 	if room, ok := instance.gameRooms[groupCode]; ok {
 		// 检查是否是当前游戏玩家
 		if sender.Uin == room.whitePlayer || sender.Uin == room.blackPlayer {
+			room.chessGame.Resign(room.chessGame.Position().Turn())
+			chessString := getChessString(room)
 			delete(instance.gameRooms, groupCode)
-			return textWithAt(sender.Uin, "认输，游戏结束。\n"+room.chessGame.String())
+			return textWithAt(sender.Uin, "认输，游戏结束。\n"+chessString)
 		}
 		return textWithAt(sender.Uin, "不是对局中的玩家，无法认输。")
 	}
@@ -143,7 +153,7 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 				msg += winner
 				msg += "胜利，因为将杀。\n"
 			}
-			chessString := room.chessGame.String()
+			chessString := getChessString(room)
 			delete(instance.gameRooms, groupCode)
 			return simpleText(msg + chessString).Append(boardImgEle)
 		}
@@ -232,4 +242,14 @@ func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLog
 
 	logger.Debugf("No room for groupCode %d.", groupCode)
 	return nil, false, "对局不存在"
+}
+
+func getChessString(room chessRoom) string {
+	game := room.chessGame
+	dataString := fmt.Sprintf("[Date \"%s\"]\n", time.Now().Format("2006-01-02"))
+	whiteString := fmt.Sprintf("[White \"%s\"]\n", room.whiteName)
+	blackString := fmt.Sprintf("[Black \"%s\"]\n", room.blackName)
+	chessString := game.String()
+
+	return dataString + whiteString + blackString + chessString
 }
