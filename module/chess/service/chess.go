@@ -44,10 +44,9 @@ func Game(c *client.QQClient, groupCode int64, sender *message.Sender, logger lo
 		}
 		room.blackPlayer = sender.Uin
 		instance.gameRooms[groupCode] = room
-		boardImgEle, ok := getBoardElement(c, groupCode, logger)
+		boardImgEle, ok, errMsg := getBoardElement(c, groupCode, logger)
 		if !ok {
-			delete(instance.gameRooms, groupCode)
-			return errorResetText("无法生成棋盘图片。")
+			return errorText(errMsg)
 		}
 		return simpleText("黑棋已加入对局，请白方下棋。").Append(message.NewAt(room.whitePlayer)).Append(boardImgEle)
 	}
@@ -118,10 +117,9 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 			instance.gameRooms[groupCode] = room
 		}
 		// 生成棋盘图片
-		boardImgEle, ok := getBoardElement(c, groupCode, logger)
+		boardImgEle, ok, errMsg := getBoardElement(c, groupCode, logger)
 		if !ok {
-			delete(instance.gameRooms, groupCode)
-			return errorResetText("无法生成棋盘图片")
+			return errorText(errMsg)
 		}
 		// 检查游戏是否结束
 		if room.chessGame.Method() != chess.NoMethod {
@@ -180,8 +178,8 @@ func Cheese(c *client.QQClient, groupCode int64, logger logrus.FieldLogger) *mes
 	return simpleText("Chess Cheese Cheese Chess").Append(ele)
 }
 
-func errorResetText(errMsg string) *message.SendingMessage {
-	return simpleText("发生错误，对局已重置。请联系开发者修 bug。\n开源地址 https://github.com/aimerneige/MiraiChess/issues\n错误信息：" + errMsg)
+func errorText(errMsg string) *message.SendingMessage {
+	return simpleText("发生错误，请联系开发者修 bug。\n开源地址 https://github.com/aimerneige/MiraiChess/issues\n错误信息：" + errMsg)
 }
 
 func simpleText(msg string) *message.SendingMessage {
@@ -195,7 +193,7 @@ func textWithAt(target int64, msg string) *message.SendingMessage {
 	return message.NewSendingMessage().Append(message.NewAt(target)).Append(message.NewText(msg))
 }
 
-func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLogger) (*message.GroupImageElement, bool) {
+func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLogger) (*message.GroupImageElement, bool, string) {
 	if room, ok := instance.gameRooms[groupCode]; ok {
 		var uciStr string
 		// 将最后一步走子转化为 uci 字符串
@@ -209,29 +207,29 @@ func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLog
 		if err := exec.Command("./scripts/board2svg.py", room.chessGame.FEN(), svgFilePath, uciStr).Run(); err != nil {
 			logger.Info("./scripts/board2svg.py", " ", room.chessGame.FEN(), " ", svgFilePath, " ", uciStr)
 			logger.WithError(err).Error("Unable to generate svg file.")
-			return nil, false
+			return nil, false, "无法生成 svg 图片"
 		}
 		// 调用 inkscape 将 svg 图片转化为 png 图片
 		if err := exec.Command("./bin/inkscape", "-w", "720", "-h", "720", svgFilePath, "-o", cheeseFilePath).Run(); err != nil {
 			logger.WithError(err).Error("Unable to convert to png.")
-			return nil, false
+			return nil, false, "无法生成 png 图片"
 		}
 		// 尝试读取 png 图片
 		f, err := os.Open(cheeseFilePath)
 		if err != nil {
 			logger.WithError(err).Errorf("Unable to read open image file in %s.", cheeseFilePath)
-			return nil, false
+			return nil, false, "无法读取 png 图片"
 		}
 		defer f.Close()
 		// 上传图片并返回
 		ele, err := c.UploadGroupImage(groupCode, f)
 		if err != nil {
 			logger.WithError(err).Error("Unable to upload image.")
-			return nil, false
+			return nil, false, "网络错误，无法上传图片"
 		}
-		return ele, true
+		return ele, true, ""
 	}
 
 	logger.Debugf("No room for groupCode %d.", groupCode)
-	return nil, false
+	return nil, false, "对局不存在"
 }
