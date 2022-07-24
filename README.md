@@ -109,7 +109,9 @@ make run
 
 ## 加群调戏
 
-![857066811](img/qr-code.png)
+QQ Group: 857066811
+
+![qrcode 857066811](img/qr-code.png)
 
 ## TODO
 
