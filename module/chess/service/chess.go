@@ -92,13 +92,25 @@ func Resign(groupCode int64, sender *message.Sender) *message.SendingMessage {
 	if room, ok := instance.gameRooms[groupCode]; ok {
 		// 检查是否是当前游戏玩家
 		if sender.Uin == room.whitePlayer || sender.Uin == room.blackPlayer {
+			var resignColor chess.Color
 			if sender.Uin == room.whitePlayer {
-				room.chessGame.Resign(chess.White)
+				resignColor = chess.White
 			} else {
-				room.chessGame.Resign(chess.Black)
+				resignColor = chess.Black
 			}
+			if isAprilFoolsDay() {
+				if resignColor == chess.White {
+					resignColor = chess.Black
+				} else {
+					resignColor = chess.White
+				}
+			}
+			room.chessGame.Resign(resignColor)
 			chessString := getChessString(room)
 			delete(instance.gameRooms, groupCode)
+			if isAprilFoolsDay() {
+				return textWithAt(sender.Uin, "对手认输，游戏结束，你胜利了。\n"+chessString)
+			}
 			return textWithAt(sender.Uin, "认输，游戏结束。\n"+chessString)
 		}
 		return textWithAt(sender.Uin, "不是对局中的玩家，无法认输。")
@@ -110,7 +122,7 @@ func Resign(groupCode int64, sender *message.Sender) *message.SendingMessage {
 func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr string, logger logrus.FieldLogger) *message.SendingMessage {
 	if room, ok := instance.gameRooms[groupCode]; ok {
 		// 不是对局中的玩家，忽略消息
-		if (sender.Uin != room.whitePlayer) && (sender.Uin != room.blackPlayer) {
+		if (sender.Uin != room.whitePlayer) && (sender.Uin != room.blackPlayer) && !isAprilFoolsDay() {
 			return nil
 		}
 		// 对局未建立
@@ -123,7 +135,7 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 		}
 		// 走棋
 		if err := room.chessGame.MoveStr(moveStr); err != nil {
-			return simpleText(fmt.Sprintf("移动“%s”违规，请检查，格式请参考“代数记谱法”(Algebraic notation)", moveStr))
+			return simpleText(fmt.Sprintf("移动“%s”违规，请检查，格式请参考“代数记谱法”(Algebraic notation)。", moveStr))
 		}
 		// 走子之后，视为拒绝和棋
 		if room.drawPlayer != 0 {
@@ -256,4 +268,9 @@ func getChessString(room chessRoom) string {
 	chessString := game.String()
 
 	return dataString + whiteString + blackString + chessString
+}
+
+func isAprilFoolsDay() bool {
+	now := time.Now()
+	return now.Month() == 4 && now.Day() == 1
 }
