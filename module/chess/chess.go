@@ -1,11 +1,13 @@
 package chess
 
 import (
+	"log"
 	"regexp"
 	"strings"
 	"sync"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
+	"github.com/Logiase/MiraiGo-Template/config"
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
@@ -14,7 +16,7 @@ import (
 
 var instance *chess
 var logger = utils.GetModuleLogger("aimerneige.chess")
-var allowedGroup []int64
+var disallowedGroup []int64
 
 type chess struct {
 }
@@ -35,8 +37,12 @@ func (c *chess) MiraiGoModule() bot.ModuleInfo {
 // 在此处可以进行 Module 的初始化配置
 // 如配置读取
 func (c *chess) Init() {
-	// 读取配置文件并初始化 allowedGroup
-	// 咕咕咕
+	// 读取配置文件并初始化 disallowedGroup
+	configSlice := config.GlobalConfig.GetIntSlice("chess.disallowed")
+	for _, group := range configSlice {
+		disallowedGroup = append(disallowedGroup, int64(group))
+	}
+	log.Println(disallowedGroup)
 }
 
 // PostInit 第二次初始化
@@ -48,10 +54,10 @@ func (c *chess) PostInit() {
 // Serve 注册服务函数部分
 func (c *chess) Serve(b *bot.Bot) {
 	b.OnGroupMessage(func(c *client.QQClient, msg *message.GroupMessage) {
-		// 过滤消息来源，仅对配置文件中指定的群提供服务
-		// if !isAllowedGroupCode(msg.GroupCode) {
-		// 	return
-		// }
+		// 过滤消息来源，如果在禁用列表中则忽略消息
+		if isDisallowedGroupCode(msg.GroupCode) {
+			return
+		}
 		// 忽略匿名消息
 		if msg.Sender.IsAnonymous() {
 			return
@@ -101,8 +107,8 @@ func (c *chess) Stop(b *bot.Bot, wg *sync.WaitGroup) {
 	defer wg.Done()
 }
 
-func isAllowedGroupCode(grpCode int64) bool {
-	for _, v := range allowedGroup {
+func isDisallowedGroupCode(grpCode int64) bool {
+	for _, v := range disallowedGroup {
 		if grpCode == v {
 			return true
 		}

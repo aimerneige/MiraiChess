@@ -3,3 +3,7 @@ bot:
 logiase:
   autoreply:
     path: "./config/autoreply.yaml"
+chess:
+  disallowed:
+    - 741535071
+    - 731500560
