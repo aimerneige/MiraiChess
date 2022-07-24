@@ -92,7 +92,11 @@ func Resign(groupCode int64, sender *message.Sender) *message.SendingMessage {
 	if room, ok := instance.gameRooms[groupCode]; ok {
 		// 检查是否是当前游戏玩家
 		if sender.Uin == room.whitePlayer || sender.Uin == room.blackPlayer {
-			room.chessGame.Resign(room.chessGame.Position().Turn())
+			if sender.Uin == room.whitePlayer {
+				room.chessGame.Resign(chess.White)
+			} else {
+				room.chessGame.Resign(chess.Black)
+			}
 			chessString := getChessString(room)
 			delete(instance.gameRooms, groupCode)
 			return textWithAt(sender.Uin, "认输，游戏结束。\n"+chessString)
