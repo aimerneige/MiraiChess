@@ -39,14 +39,6 @@ func init() {
 	}
 }
 
-// UpdatePathConfig update path config
-func UpdatePathConfig(inkscape, svg, png, cheese, script string) {
-	inkscapePath = inkscapePath
-	svgFilePath = svg
-	pngFilePath = png
-	board2svgScriptPath = script
-}
-
 // Game 下棋
 func Game(c *client.QQClient, groupCode int64, sender *message.Sender, logger logrus.FieldLogger) *message.SendingMessage {
 	if room, ok := instance.gameRooms[groupCode]; ok {
