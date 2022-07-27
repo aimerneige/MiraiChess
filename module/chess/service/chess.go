@@ -12,9 +12,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const svgFilePath = "./temp/board.svg"
-const cheeseFilePath = "./temp/board.png"
-const board2svgScriptPath = "./scripts/board2svg.py"
+var inkscapePath string = "./bin/inkscape"
+var svgFilePath string = "./temp/board.svg"
+var pngFilePath string = "./temp/board.png"
+var cheeseFilePath string = "./img/cheese.jpeg"
+var board2svgScriptPath string = "./scripts/board2svg.py"
 
 var instance *chessService
 
@@ -35,6 +37,14 @@ func init() {
 	instance = &chessService{
 		gameRooms: make(map[int64]chessRoom, 1),
 	}
+}
+
+// UpdatePathConfig update path config
+func UpdatePathConfig(inkscape, svg, png, cheese, script string) {
+	inkscapePath = inkscapePath
+	svgFilePath = svg
+	pngFilePath = png
+	board2svgScriptPath = script
 }
 
 // Game 下棋
@@ -188,7 +198,6 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 
 // Cheese Easter Egg
 func Cheese(c *client.QQClient, groupCode int64, logger logrus.FieldLogger) *message.SendingMessage {
-	cheeseFilePath := "./img/cheese.jpeg"
 	// 读取图片
 	f, err := os.Open(cheeseFilePath)
 	if err != nil {
@@ -237,14 +246,14 @@ func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLog
 			return nil, false, "无法生成 svg 图片"
 		}
 		// 调用 inkscape 将 svg 图片转化为 png 图片
-		if err := exec.Command("./bin/inkscape", "-w", "720", "-h", "720", svgFilePath, "-o", cheeseFilePath).Run(); err != nil {
+		if err := exec.Command(inkscapePath, "-w", "720", "-h", "720", svgFilePath, "-o", pngFilePath).Run(); err != nil {
 			logger.WithError(err).Error("Unable to convert to png.")
 			return nil, false, "无法生成 png 图片"
 		}
 		// 尝试读取 png 图片
-		f, err := os.Open(cheeseFilePath)
+		f, err := os.Open(pngFilePath)
 		if err != nil {
-			logger.WithError(err).Errorf("Unable to read open image file in %s.", cheeseFilePath)
+			logger.WithError(err).Errorf("Unable to read open image file in %s.", pngFilePath)
 			return nil, false, "无法读取 png 图片"
 		}
 		defer f.Close()
