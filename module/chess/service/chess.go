@@ -12,11 +12,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var inkscapePath string = "./bin/inkscape"
-var svgFilePath string = "./temp/board.svg"
-var pngFilePath string = "./temp/board.png"
-var cheeseFilePath string = "./img/cheese.jpeg"
-var board2svgScriptPath string = "./scripts/board2svg.py"
+const inkscapePath string = "./bin/inkscape"
+const svgFilePath string = "./temp/board.svg"
+const pngFilePath string = "./temp/board.png"
+const cheeseFilePath string = "./img/cheese.jpeg"
+const board2svgScriptPath string = "./scripts/board2svg.py"
 
 var instance *chessService
 
