@@ -1,7 +1,6 @@
 package chess
 
 import (
-	"log"
 	"regexp"
 	"strings"
 	"sync"
@@ -42,7 +41,6 @@ func (c *chess) Init() {
 	for _, group := range configSlice {
 		disallowedGroup = append(disallowedGroup, int64(group))
 	}
-	log.Println(disallowedGroup)
 }
 
 // PostInit 第二次初始化
