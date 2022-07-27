@@ -14,6 +14,8 @@ I assume that most of the users of this repo are Chinese, so there will be no En
 
 ## 如何使用
 
+### 安装
+
 准备如下环境：
 
 1. Linux 服务器 （笔记本啥的也可以，关键要有 Linux 环境）
@@ -31,7 +33,7 @@ pip install python-chess
 
 ```bash
 mkdir -p /opt/MiraiChess
-tar -xzvf MiraiChess-linux-amd64-v1.4.1.tar.gz -C /opt/MiraiChess
+tar -xzvf MiraiChess-linux-amd64-v1.4.2.tar.gz -C /opt/MiraiChess
 cd /opt/MiraiChess
 ```
 
@@ -65,6 +67,10 @@ systemctl start mirai-chess.service
 ```bash
 systemctl enable mirai-chess.service
 ```
+
+### 升级
+
+下载解压 [release](https://github.com/aimerneige/MiraiChess/releases) 后直接执行 `update.sh` 即可。
 
 ## 如何编译
 

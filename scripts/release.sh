@@ -25,6 +25,7 @@ mkdir ./release/$TARGET/scripts
 cp ./scripts/board2svg.py ./release/$TARGET/scripts
 cp ./scripts/download_inkscape.sh ./release/$TARGET/scripts
 cp ./scripts/start.sh ./release/$TARGET
+cp ./scripts/update.sh ./release/$TARGET
 
 mkdir ./release/$TARGET/temp
 

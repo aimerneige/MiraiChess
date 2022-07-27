@@ -2,7 +2,7 @@ GO			:= go
 GO_SOURCES	:= $(shell find . -name "*.go" -type f)
 GOOS		?= linux
 GOARCH		?= amd64
-VERSION		?= v1.4.1
+VERSION		?= v1.4.2
 
 .PHONY: run release build fmt clean updatedep
 
