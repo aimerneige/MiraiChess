@@ -14,6 +14,7 @@ import (
 
 const svgFilePath = "./temp/board.svg"
 const cheeseFilePath = "./temp/board.png"
+const board2svgScriptPath = "./scripts/board2svg.py"
 
 var instance *chessService
 
@@ -230,8 +231,8 @@ func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLog
 			uciStr = "None"
 		}
 		// 调用 python 脚本生成 svg 文件
-		if err := exec.Command("./scripts/board2svg.py", room.chessGame.FEN(), svgFilePath, uciStr).Run(); err != nil {
-			logger.Info("./scripts/board2svg.py", " ", room.chessGame.FEN(), " ", svgFilePath, " ", uciStr)
+		if err := exec.Command(board2svgScriptPath, room.chessGame.FEN(), svgFilePath, uciStr).Run(); err != nil {
+			logger.Info(board2svgScriptPath, " ", room.chessGame.FEN(), " ", svgFilePath, " ", uciStr)
 			logger.WithError(err).Error("Unable to generate svg file.")
 			return nil, false, "无法生成 svg 图片"
 		}
