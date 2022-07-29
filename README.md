@@ -74,6 +74,8 @@ systemctl enable mirai-chess.service
 
 ## 如何编译
 
+> :warning: 如果你打算手动编译，请在 [release](https://github.com/aimerneige/MiraiChess/releases) 下载一份最新稳定代码，不要直接使用 master 分支。
+
 环境依赖：
 
 1. [golang](https://go.dev/dl/)
