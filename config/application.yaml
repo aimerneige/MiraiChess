@@ -7,3 +7,5 @@ chess:
   disallowed:
     - 741535071
     - 731500560
+  blacklist:
+    - 1781924496

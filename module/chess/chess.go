@@ -16,6 +16,7 @@ import (
 var instance *chess
 var logger = utils.GetModuleLogger("aimerneige.chess")
 var disallowedGroup []int64
+var blacklistUser []int64
 
 type chess struct {
 }
@@ -37,9 +38,13 @@ func (c *chess) MiraiGoModule() bot.ModuleInfo {
 // 如配置读取
 func (c *chess) Init() {
 	// 读取配置文件并初始化 disallowedGroup
-	configSlice := config.GlobalConfig.GetIntSlice("chess.disallowed")
-	for _, group := range configSlice {
+	disallowedGroupSlice := config.GlobalConfig.GetIntSlice("chess.disallowed")
+	for _, group := range disallowedGroupSlice {
 		disallowedGroup = append(disallowedGroup, int64(group))
+	}
+	blacklistUserSlice := config.GlobalConfig.GetIntSlice("chess.blacklist")
+	for _, user := range blacklistUserSlice {
+		blacklistUser = append(blacklistUser, int64(user))
 	}
 }
 
@@ -52,6 +57,10 @@ func (c *chess) PostInit() {
 // Serve 注册服务函数部分
 func (c *chess) Serve(b *bot.Bot) {
 	b.OnGroupMessage(func(c *client.QQClient, msg *message.GroupMessage) {
+		// 判断是否在黑名单中，如果是则忽略消息
+		if inBlacklist(msg.Sender.Uin) {
+			return
+		}
 		// 过滤消息来源，如果在禁用列表中则忽略消息
 		if isDisallowedGroupCode(msg.GroupCode) {
 			return
@@ -108,6 +117,15 @@ func (c *chess) Stop(b *bot.Bot, wg *sync.WaitGroup) {
 func isDisallowedGroupCode(grpCode int64) bool {
 	for _, v := range disallowedGroup {
 		if grpCode == v {
+			return true
+		}
+	}
+	return false
+}
+
+func inBlacklist(userID int64) bool {
+	for _, v := range blacklistUser {
+		if userID == v {
 			return true
 		}
 	}
