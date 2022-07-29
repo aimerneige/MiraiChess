@@ -113,9 +113,17 @@ make run
 
 项目代码本身可以编译 Windows 版本，但在 svg 转 png 时用到了 [inkscape](https://inkscape.org/)，该软件提供 Windows 版本但本项目没有测试其可用性，如果您有这方面的需求，可以尝试在 Windows 下调用 inkscape 或重写 svg 转 png 的相关代码。（PR WELCOME）
 
-## 加群调戏
+## 模块化支持
 
-QQ Group: 857066811
+如果你希望以模块化的方式将本 bot 集成到已有项目中，可以使用如下仓库：
+
+> 还在开发中，开发进度详见 [issue 5](https://github.com/aimerneige/MiraiChess/issues/5)
+
+## 交流群
+
+点击链接或扫码加入 QQ 群:
+
+[857066811](https://qm.qq.com/cgi-bin/qm/qr?k=rMtw1SlmoFOp08i5Zw5bM361ljIyzVA-&authKey=9OUzro5oH5CnnFaAbIMwa60987+8ZMwu5GvUAlFUzDIQKVL91z9zUhWp6m1Kayf8&noverify=0)
 
 ![qrcode 857066811](img/qr-code.png)
 
@@ -124,6 +132,7 @@ QQ Group: 857066811
 - [x] 提供 service 文件
 - [ ] 提供 docker 支持
 - [x] 完善文档
+- [ ] 模块化支持
 
 ## LICENSE
 
