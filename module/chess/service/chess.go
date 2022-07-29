@@ -207,7 +207,7 @@ func Cheese(c *client.QQClient, groupCode int64, logger logrus.FieldLogger) *mes
 }
 
 func errorText(errMsg string) *message.SendingMessage {
-	return simpleText("发生错误，请联系开发者修 bug。\n开源地址 https://github.com/aimerneige/MiraiChess/issues\n错误信息：" + errMsg)
+	return simpleText("发生错误，请联系开发者修 bug。\n反馈地址 https://github.com/aimerneige/MiraiChess/issues\n错误信息：" + errMsg)
 }
 
 func simpleText(msg string) *message.SendingMessage {
