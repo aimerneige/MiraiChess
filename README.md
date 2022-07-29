@@ -72,6 +72,8 @@ systemctl enable mirai-chess.service
 
 下载解压 [release](https://github.com/aimerneige/MiraiChess/releases) 后直接执行 `update.sh` 即可。
 
+更新脚本不会修改配置文件，当有功能更新时请注意手动更改配置文件。
+
 ## 如何编译
 
 > :warning: 如果你打算手动编译，请在 [release](https://github.com/aimerneige/MiraiChess/releases) 下载一份最新稳定代码，不要直接使用 master 分支。
