@@ -251,6 +251,10 @@ func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLog
 		defer f.Close()
 		// 上传图片并返回
 		ele, err := c.UploadGroupImage(groupCode, f)
+		// 发生错误时重试 3 次，否则报错
+		for i := 0; i < 3 && err != nil; i++ {
+			ele, err = c.UploadGroupImage(groupCode, f)
+		}
 		if err != nil {
 			logger.WithError(err).Error("Unable to upload image.")
 			return nil, false, "网络错误，无法上传图片"
