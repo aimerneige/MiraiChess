@@ -73,7 +73,7 @@ func Game(c *client.QQClient, groupCode int64, sender *message.Sender, logger lo
 		blackName:   "",
 		drawPlayer:  0,
 	}
-	return simpleText("已创建新的对局，发送跑「下棋」或「chess」可加入对局。")
+	return simpleText("已创建新的对局，发送「下棋」或「chess」可加入对局。")
 }
 
 // Abort 中断对局
