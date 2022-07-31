@@ -43,7 +43,15 @@ func init() {
 func Game(c *client.QQClient, groupCode int64, sender *message.Sender, logger logrus.FieldLogger) *message.SendingMessage {
 	if room, ok := instance.gameRooms[groupCode]; ok {
 		if room.blackPlayer != 0 {
-			return textWithAt(sender.Uin, "对局已在进行中，无法创建或加入对局。")
+			msg := textWithAt(sender.Uin, "对局已在进行中，无法创建或加入对局，当前对局玩家为：")
+			if room.whitePlayer != 0 {
+				msg.Append(message.NewAt(room.whitePlayer))
+			}
+			if room.blackPlayer != 0 {
+				msg.Append(message.NewAt(room.blackPlayer))
+			}
+			msg.Append(message.NewText("，群主或管理员发送「中断」或「abort」可中断对局（自动判和）。"))
+			return msg
 		}
 		if sender.Uin == room.whitePlayer {
 			return textWithAt(sender.Uin, "请等候其他玩家加入游戏。")
@@ -65,7 +73,36 @@ func Game(c *client.QQClient, groupCode int64, sender *message.Sender, logger lo
 		blackName:   "",
 		drawPlayer:  0,
 	}
-	return simpleText("已创建新的对局，发送“下棋”或“chess”可加入对局。")
+	return simpleText("已创建新的对局，发送跑「下棋」或「chess」可加入对局。")
+}
+
+// Abort 中断对局
+func Abort(c *client.QQClient, groupCode int64, sender *message.Sender, logger logrus.FieldLogger) *message.SendingMessage {
+	if room, ok := instance.gameRooms[groupCode]; ok {
+		// 判断是否是群主或管理员
+		groupMemberInfo, err := c.GetMemberInfo(groupCode, sender.Uin)
+		if err != nil {
+			logger.WithError(err).Errorf("Fail to get group member info.")
+			return nil
+		}
+		if groupMemberInfo.Permission != client.Administrator && groupMemberInfo.Permission != client.Owner {
+			return nil
+		}
+
+		room.chessGame.Draw(chess.DrawOffer)
+		chessString := getChessString(room)
+		delete(instance.gameRooms, groupCode)
+		msg := simpleText("对局已被管理员中断，游戏结束。")
+		if room.whitePlayer != 0 {
+			msg.Append(message.NewAt(room.whitePlayer))
+		}
+		if room.blackPlayer != 0 {
+			msg.Append(message.NewAt(room.blackPlayer))
+		}
+		msg.Append(message.NewText("\n\n" + chessString))
+		return msg
+	}
+	return simpleText("对局不存在，发送「下棋」或「chess」可创建对局。")
 }
 
 // Draw 和棋
@@ -75,7 +112,7 @@ func Draw(groupCode int64, sender *message.Sender) *message.SendingMessage {
 			if room.drawPlayer == 0 {
 				room.drawPlayer = sender.Uin
 				instance.gameRooms[groupCode] = room
-				return textWithAt(sender.Uin, "请求和棋，发送“和棋”或“draw”接受和棋。走棋视为拒绝和棋。")
+				return textWithAt(sender.Uin, "请求和棋，发送「和棋」或「draw」接受和棋。走棋视为拒绝和棋。")
 			}
 			if room.drawPlayer == sender.Uin {
 				return textWithAt(sender.Uin, "已发起和棋请求，请勿重复发送。")
@@ -87,7 +124,7 @@ func Draw(groupCode int64, sender *message.Sender) *message.SendingMessage {
 		}
 		return textWithAt(sender.Uin, "不是对局中的玩家，无法请求和棋。")
 	}
-	return simpleText("对局不存在，发送“下棋”或“chess”可创建对局。")
+	return simpleText("对局不存在，发送「下棋」或「chess」可创建对局。")
 }
 
 // Resign 认输
@@ -118,7 +155,7 @@ func Resign(groupCode int64, sender *message.Sender) *message.SendingMessage {
 		}
 		return textWithAt(sender.Uin, "不是对局中的玩家，无法认输。")
 	}
-	return simpleText("对局不存在，发送“下棋”或“chess”可创建对局。")
+	return simpleText("对局不存在，发送「下棋」或「chess」可创建对局。")
 }
 
 // Play 走棋
@@ -138,7 +175,7 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 		}
 		// 走棋
 		if err := room.chessGame.MoveStr(moveStr); err != nil {
-			return simpleText(fmt.Sprintf("移动“%s”违规，请检查，格式请参考“代数记谱法”(Algebraic notation)。", moveStr))
+			return simpleText(fmt.Sprintf("移动「%s」违规，请检查，格式请参考「代数记谱法」(Algebraic notation)。", moveStr))
 		}
 		// 走子之后，视为拒绝和棋
 		if room.drawPlayer != 0 {
@@ -185,7 +222,7 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 		}
 		return textWithAt(currentPlayer, "对手已走子，游戏继续。").Append(boardImgEle)
 	}
-	return textWithAt(sender.Uin, "对局不存在，发送“下棋”或“chess”可创建对局。")
+	return textWithAt(sender.Uin, "对局不存在，发送「下棋」或「chess」可创建对局。")
 }
 
 // Cheese Easter Egg

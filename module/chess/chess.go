@@ -78,6 +78,8 @@ func (c *chess) Serve(b *bot.Bot) {
 			replyMsg = service.Resign(msg.GroupCode, msg.Sender)
 		case msgString == "draw" || msgString == "和棋":
 			replyMsg = service.Draw(msg.GroupCode, msg.Sender)
+		case msgString == "abort" || msgString == "中断":
+			replyMsg = service.Abort(c, msg.GroupCode, msg.Sender, logger)
 		case []rune(msgString)[0] == '!' || []rune(msgString)[0] == '！':
 			moveStr := string([]rune(msgString)[1:])
 			moveStr = strings.TrimSpace(moveStr)
