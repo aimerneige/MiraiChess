@@ -78,17 +78,16 @@ func Game(c *client.QQClient, groupCode int64, sender *message.Sender, logger lo
 
 // Abort 中断对局
 func Abort(c *client.QQClient, groupCode int64, sender *message.Sender, logger logrus.FieldLogger) *message.SendingMessage {
+	// 判断是否是群主或管理员
+	groupMemberInfo, err := c.GetMemberInfo(groupCode, sender.Uin)
+	if err != nil {
+		logger.WithError(err).Errorf("Fail to get group member info.")
+		return nil
+	}
+	if groupMemberInfo.Permission != client.Administrator && groupMemberInfo.Permission != client.Owner {
+		return nil
+	}
 	if room, ok := instance.gameRooms[groupCode]; ok {
-		// 判断是否是群主或管理员
-		groupMemberInfo, err := c.GetMemberInfo(groupCode, sender.Uin)
-		if err != nil {
-			logger.WithError(err).Errorf("Fail to get group member info.")
-			return nil
-		}
-		if groupMemberInfo.Permission != client.Administrator && groupMemberInfo.Permission != client.Owner {
-			return nil
-		}
-
 		room.chessGame.Draw(chess.DrawOffer)
 		chessString := getChessString(room)
 		delete(instance.gameRooms, groupCode)
