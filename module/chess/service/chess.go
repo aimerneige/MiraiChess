@@ -43,6 +43,12 @@ func init() {
 	}
 }
 
+// UpdateELOConfig update elo config
+func UpdateELOConfig(enabled bool, defaultValue uint) {
+	eloEnabled = enabled
+	eloDefault = defaultValue
+}
+
 // Game 下棋
 func Game(c *client.QQClient, groupCode int64, sender *message.Sender, logger logrus.FieldLogger) *message.SendingMessage {
 	if room, ok := instance.gameRooms[groupCode]; ok {
@@ -126,14 +132,17 @@ func Draw(groupCode int64, sender *message.Sender, logger logrus.FieldLogger) *m
 			}
 			room.chessGame.Draw(chess.DrawOffer)
 			chessString := getChessString(room)
-			dbService := NewDBService(database.GetDB())
-			if err := dbService.CreatePGN(chessString, room.whitePlayer, room.blackPlayer, room.whiteName, room.blackName); err != nil {
-				logger.WithError(err).Error("Fail to create PGN.")
-			}
-			whiteScore, blackScore := 0.5, 0.5
-			eloString, err := getELOString(room, whiteScore, blackScore, dbService)
-			if err != nil {
-				logger.WithError(err).Error("Fail to get eloString. " + eloString)
+			eloString := ""
+			if eloEnabled {
+				dbService := NewDBService(database.GetDB())
+				if err := dbService.CreatePGN(chessString, room.whitePlayer, room.blackPlayer, room.whiteName, room.blackName); err != nil {
+					logger.WithError(err).Error("Fail to create PGN.")
+				}
+				whiteScore, blackScore := 0.5, 0.5
+				eloString, err := getELOString(room, whiteScore, blackScore, dbService)
+				if err != nil {
+					logger.WithError(err).Error("Fail to get eloString. " + eloString)
+				}
 			}
 			delete(instance.gameRooms, groupCode)
 			return textWithAt(sender.Uin, "接受和棋，游戏结束。\n"+eloString+chessString)
@@ -163,20 +172,25 @@ func Resign(groupCode int64, sender *message.Sender, logger logrus.FieldLogger) 
 			}
 			room.chessGame.Resign(resignColor)
 			chessString := getChessString(room)
-			dbService := NewDBService(database.GetDB())
-			if err := dbService.CreatePGN(chessString, room.whitePlayer, room.blackPlayer, room.whiteName, room.blackName); err != nil {
-				logger.WithError(err).Error("Fail to create PGN.")
+
+			eloString := ""
+			if eloEnabled {
+				dbService := NewDBService(database.GetDB())
+				if err := dbService.CreatePGN(chessString, room.whitePlayer, room.blackPlayer, room.whiteName, room.blackName); err != nil {
+					logger.WithError(err).Error("Fail to create PGN.")
+				}
+				whiteScore, blackScore := 1.0, 1.0
+				if resignColor == chess.White {
+					whiteScore = 0.0
+				} else {
+					blackScore = 0.0
+				}
+				eloString, err := getELOString(room, whiteScore, blackScore, dbService)
+				if err != nil {
+					logger.WithError(err).Error("Fail to get eloString. " + eloString)
+				}
 			}
-			whiteScore, blackScore := 1.0, 1.0
-			if resignColor == chess.White {
-				whiteScore = 0.0
-			} else {
-				blackScore = 0.0
-			}
-			eloString, err := getELOString(room, whiteScore, blackScore, dbService)
-			if err != nil {
-				logger.WithError(err).Error("Fail to get eloString. " + eloString)
-			}
+
 			delete(instance.gameRooms, groupCode)
 			if isAprilFoolsDay() {
 				return textWithAt(sender.Uin, "对手认输，游戏结束，你胜利了。\n"+eloString+chessString)
@@ -245,15 +259,17 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 				msg += "胜利，因为将杀。\n"
 			}
 			chessString := getChessString(room)
-			dbService := NewDBService(database.GetDB())
-			if err := dbService.CreatePGN(chessString, room.whitePlayer, room.blackPlayer, room.whiteName, room.blackName); err != nil {
-				logger.WithError(err).Error("Fail to create PGN.")
+			eloString := ""
+			if eloEnabled {
+				dbService := NewDBService(database.GetDB())
+				if err := dbService.CreatePGN(chessString, room.whitePlayer, room.blackPlayer, room.whiteName, room.blackName); err != nil {
+					logger.WithError(err).Error("Fail to create PGN.")
+				}
+				eloString, err := getELOString(room, whiteScore, blackScore, dbService)
+				if err != nil {
+					logger.WithError(err).Error("Fail to get eloString. " + eloString)
+				}
 			}
-			eloString, err := getELOString(room, whiteScore, blackScore, dbService)
-			if err != nil {
-				logger.WithError(err).Error("Fail to get eloString. " + eloString)
-			}
-
 			delete(instance.gameRooms, groupCode)
 			return simpleText(msg + eloString + chessString).Append(boardImgEle)
 		}
