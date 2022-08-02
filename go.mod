@@ -9,15 +9,20 @@ require (
 	github.com/notnil/chess v1.8.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.11.0
+	gorm.io/driver/mysql v1.3.5
+	gorm.io/driver/sqlite v1.3.6
+	gorm.io/gorm v1.23.8
 )
 
 require (
 	github.com/Baozisoftware/qrcode-terminal-go v0.0.0-20170407111555-c0650d8dff0f // indirect
 	github.com/RomiChan/protobuf v0.0.0-20211223055824-048df49a8956 // indirect
-	github.com/ajstarks/svgo v0.0.0-20200320125537-f189e35d30ca // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
+	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible // indirect
 	github.com/lestrrat-go/strftime v1.0.5 // indirect
@@ -25,6 +30,7 @@ require (
 	github.com/maruel/rs v1.0.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
+	github.com/mattn/go-sqlite3 v1.14.12 // indirect
 	github.com/mitchellh/mapstructure v1.4.3 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.0-beta.8 // indirect
