@@ -8,8 +8,10 @@ import (
 
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
+	"github.com/aimerneige/MiraiChess/module/chess/database"
 	"github.com/notnil/chess"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 const inkscapePath string = "./bin/inkscape"
@@ -19,6 +21,8 @@ const cheeseFilePath string = "./img/cheese.jpeg"
 const board2svgScriptPath string = "./scripts/board2svg.py"
 
 var instance *chessService
+var eloEnabled bool = false
+var eloDefault uint = 500
 
 type chessService struct {
 	gameRooms map[int64]chessRoom
@@ -90,6 +94,10 @@ func Abort(c *client.QQClient, groupCode int64, sender *message.Sender, logger l
 	if room, ok := instance.gameRooms[groupCode]; ok {
 		room.chessGame.Draw(chess.DrawOffer)
 		chessString := getChessString(room)
+		dbService := NewDBService(database.GetDB())
+		if err := dbService.CreatePGN(chessString, room.whitePlayer, room.blackPlayer, room.whiteName, room.blackName); err != nil {
+			logger.WithError(err).Error("Fail to create PGN.")
+		}
 		delete(instance.gameRooms, groupCode)
 		msg := simpleText("对局已被管理员中断，游戏结束。")
 		if room.whitePlayer != 0 {
@@ -105,7 +113,7 @@ func Abort(c *client.QQClient, groupCode int64, sender *message.Sender, logger l
 }
 
 // Draw 和棋
-func Draw(groupCode int64, sender *message.Sender) *message.SendingMessage {
+func Draw(groupCode int64, sender *message.Sender, logger logrus.FieldLogger) *message.SendingMessage {
 	if room, ok := instance.gameRooms[groupCode]; ok {
 		if sender.Uin == room.whitePlayer || sender.Uin == room.blackPlayer {
 			if room.drawPlayer == 0 {
@@ -118,8 +126,17 @@ func Draw(groupCode int64, sender *message.Sender) *message.SendingMessage {
 			}
 			room.chessGame.Draw(chess.DrawOffer)
 			chessString := getChessString(room)
+			dbService := NewDBService(database.GetDB())
+			if err := dbService.CreatePGN(chessString, room.whitePlayer, room.blackPlayer, room.whiteName, room.blackName); err != nil {
+				logger.WithError(err).Error("Fail to create PGN.")
+			}
+			whiteScore, blackScore := 0.5, 0.5
+			eloString, err := getELOString(room, whiteScore, blackScore, dbService)
+			if err != nil {
+				logger.WithError(err).Error("Fail to get eloString. " + eloString)
+			}
 			delete(instance.gameRooms, groupCode)
-			return textWithAt(sender.Uin, "接受和棋，游戏结束。\n"+chessString)
+			return textWithAt(sender.Uin, "接受和棋，游戏结束。\n"+eloString+chessString)
 		}
 		return textWithAt(sender.Uin, "不是对局中的玩家，无法请求和棋。")
 	}
@@ -127,7 +144,7 @@ func Draw(groupCode int64, sender *message.Sender) *message.SendingMessage {
 }
 
 // Resign 认输
-func Resign(groupCode int64, sender *message.Sender) *message.SendingMessage {
+func Resign(groupCode int64, sender *message.Sender, logger logrus.FieldLogger) *message.SendingMessage {
 	if room, ok := instance.gameRooms[groupCode]; ok {
 		// 检查是否是当前游戏玩家
 		if sender.Uin == room.whitePlayer || sender.Uin == room.blackPlayer {
@@ -146,11 +163,25 @@ func Resign(groupCode int64, sender *message.Sender) *message.SendingMessage {
 			}
 			room.chessGame.Resign(resignColor)
 			chessString := getChessString(room)
+			dbService := NewDBService(database.GetDB())
+			if err := dbService.CreatePGN(chessString, room.whitePlayer, room.blackPlayer, room.whiteName, room.blackName); err != nil {
+				logger.WithError(err).Error("Fail to create PGN.")
+			}
+			whiteScore, blackScore := 1.0, 1.0
+			if resignColor == chess.White {
+				whiteScore = 0.0
+			} else {
+				blackScore = 0.0
+			}
+			eloString, err := getELOString(room, whiteScore, blackScore, dbService)
+			if err != nil {
+				logger.WithError(err).Error("Fail to get eloString. " + eloString)
+			}
 			delete(instance.gameRooms, groupCode)
 			if isAprilFoolsDay() {
-				return textWithAt(sender.Uin, "对手认输，游戏结束，你胜利了。\n"+chessString)
+				return textWithAt(sender.Uin, "对手认输，游戏结束，你胜利了。\n"+eloString+chessString)
 			}
-			return textWithAt(sender.Uin, "认输，游戏结束。\n"+chessString)
+			return textWithAt(sender.Uin, "认输，游戏结束。\n"+eloString+chessString)
 		}
 		return textWithAt(sender.Uin, "不是对局中的玩家，无法认输。")
 	}
@@ -188,6 +219,7 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 		}
 		// 检查游戏是否结束
 		if room.chessGame.Method() != chess.NoMethod {
+			whiteScore, blackScore := 0.5, 0.5
 			msg := "游戏结束，"
 			switch room.chessGame.Method() {
 			case chess.FivefoldRepetition:
@@ -201,16 +233,29 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 			case chess.Checkmate:
 				var winner string
 				if room.chessGame.Position().Turn() == chess.White {
+					whiteScore = 0.0
+					blackScore = 1.0
 					winner = "黑方"
 				} else {
+					whiteScore = 1.0
+					blackScore = 0.0
 					winner = "白方"
 				}
 				msg += winner
 				msg += "胜利，因为将杀。\n"
 			}
 			chessString := getChessString(room)
+			dbService := NewDBService(database.GetDB())
+			if err := dbService.CreatePGN(chessString, room.whitePlayer, room.blackPlayer, room.whiteName, room.blackName); err != nil {
+				logger.WithError(err).Error("Fail to create PGN.")
+			}
+			eloString, err := getELOString(room, whiteScore, blackScore, dbService)
+			if err != nil {
+				logger.WithError(err).Error("Fail to get eloString. " + eloString)
+			}
+
 			delete(instance.gameRooms, groupCode)
-			return simpleText(msg + chessString).Append(boardImgEle)
+			return simpleText(msg + eloString + chessString).Append(boardImgEle)
 		}
 		// 提示玩家继续游戏
 		var currentPlayer int64
@@ -304,12 +349,82 @@ func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLog
 
 func getChessString(room chessRoom) string {
 	game := room.chessGame
+	siteString := "[Site \"github.com/aimerneige/MiraiChess\"]\n"
 	dataString := fmt.Sprintf("[Date \"%s\"]\n", time.Now().Format("2006-01-02"))
 	whiteString := fmt.Sprintf("[White \"%s\"]\n", room.whiteName)
 	blackString := fmt.Sprintf("[Black \"%s\"]\n", room.blackName)
 	chessString := game.String()
 
-	return dataString + whiteString + blackString + chessString
+	return siteString + dataString + whiteString + blackString + chessString
+}
+
+func getELOString(room chessRoom, whiteScore, blackScore float64, dbService *DBService) (string, error) {
+	if room.whitePlayer == 0 || room.blackPlayer == 0 {
+		return "", nil
+	}
+	eloString := "玩家等级分：\n"
+	if err := updateELORate(room.whitePlayer, room.blackPlayer, room.whiteName, room.blackName, whiteScore, blackScore, dbService); err != nil {
+		eloString += "发生错误，无法更新等级分。"
+		return eloString, err
+	}
+	whiteRate, blackRate, err := getELORate(room.whitePlayer, room.blackPlayer, dbService)
+	if err != nil {
+		eloString += "发生错误，无法获取等级分。"
+		return eloString, err
+	}
+	eloString += fmt.Sprintf("%s：%d\n%s：%d\n", room.whiteName, whiteRate, room.blackName, blackRate)
+	return eloString, nil
+}
+
+// updateELORate 更新 elo 等级分
+// 当数据库中没有玩家的等级分信息时，自动新建一条记录
+func updateELORate(whiteUin, blackUin int64, whiteName, blackName string, whiteScore, blackScore float64, dbService *DBService) error {
+	whiteRate, err := dbService.GetELORateByUin(whiteUin)
+	if err != nil {
+		if err != gorm.ErrRecordNotFound {
+			return err
+		}
+		// create white elo
+		if err := dbService.CreateELO(whiteUin, whiteName, eloDefault); err != nil {
+			return err
+		}
+		whiteRate = eloDefault
+	}
+	blackRate, err := dbService.GetELORateByUin(blackUin)
+	if err != nil {
+		if err != gorm.ErrRecordNotFound {
+			return err
+		}
+		// create black elo
+		if err := dbService.CreateELO(blackUin, blackName, eloDefault); err != nil {
+			return err
+		}
+		blackRate = eloDefault
+	}
+	whiteRate, blackRate = CalculateNewRate(whiteRate, blackRate, whiteScore, blackScore)
+	// 更新白棋玩家的 ELO 等级分
+	if err := dbService.UpdateELOByUin(whiteUin, whiteName, whiteRate); err != nil {
+		return err
+	}
+	// 更新黑棋玩家的 ELO 等级分
+	if err := dbService.UpdateELOByUin(blackUin, blackName, blackRate); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// getELORate 获取玩家的 ELO 等级分
+func getELORate(whiteUin, blackUin int64, dbService *DBService) (whiteRate uint, blackRate uint, err error) {
+	whiteRate, err = dbService.GetELORateByUin(whiteUin)
+	if err != nil {
+		return
+	}
+	blackRate, err = dbService.GetELORateByUin(blackUin)
+	if err != nil {
+		return
+	}
+	return
 }
 
 func isAprilFoolsDay() bool {
