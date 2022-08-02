@@ -5,4 +5,7 @@
   "cSpell.words": [
     "Mirai"
   ],
+  "editor.unicodeHighlight.allowedLocales": {
+    "zh-hans": true
+  },
 }
