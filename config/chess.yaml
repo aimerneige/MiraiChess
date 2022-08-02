@@ -1,0 +1,19 @@
+disallowed:
+  - 741535071
+  - 731500560
+blacklist:
+  - 1781924496
+elo:
+  enable: false
+  default: 500
+  db:
+    type: sqlite
+    mysql:
+      username: root
+      password: password
+      host: localhost
+      port: 3306
+      database: example
+      charset: utf8mb4
+    sqlite:
+      path: "./db/chess.db"

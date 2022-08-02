@@ -3,9 +3,6 @@ bot:
 logiase:
   autoreply:
     path: "./config/autoreply.yaml"
-chess:
-  disallowed:
-    - 741535071
-    - 731500560
-  blacklist:
-    - 1781924496
+aimerneige:
+  chess:
+    path: "./config/chess.yaml"
