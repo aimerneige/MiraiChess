@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 	"time"
 
 	"github.com/Mrs4s/MiraiGo/client"
@@ -15,8 +16,7 @@ import (
 )
 
 const inkscapePath string = "./bin/inkscape"
-const svgFilePath string = "./temp/board.svg"
-const pngFilePath string = "./temp/board.png"
+const tempFileDir string = "./temp/"
 const cheeseFilePath string = "./img/cheese.jpeg"
 const board2svgScriptPath string = "./scripts/board2svg.py"
 
@@ -312,6 +312,8 @@ func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLog
 		} else {
 			uciStr = "None"
 		}
+		svgFilePath := path.Join(tempFileDir, fmt.Sprintf("%d.svg", groupCode))
+		pngFilePath := path.Join(tempFileDir, fmt.Sprintf("%d.png", groupCode))
 		// 调用 python 脚本生成 svg 文件
 		if err := exec.Command(board2svgScriptPath, room.chessGame.FEN(), svgFilePath, uciStr).Run(); err != nil {
 			logger.Info(board2svgScriptPath, " ", room.chessGame.FEN(), " ", svgFilePath, " ", uciStr)
