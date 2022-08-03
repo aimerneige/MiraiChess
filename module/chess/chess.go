@@ -66,7 +66,7 @@ func (c *chess) Init() {
 	}
 	bytes := utils.ReadFile(path)
 	if err := yaml.Unmarshal(bytes, &chessConfig); err != nil {
-		logger.WithError(err).Error("Unable to read config file in %s", path)
+		logger.WithError(err).Errorf("Unable to read config file in %s", path)
 	}
 }
 
