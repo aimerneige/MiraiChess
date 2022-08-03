@@ -7,7 +7,7 @@ elo:
   enable: false
   default: 500
   db:
-    type: sqlite
+    type: sqlite # mysql | sqlite
     mysql:
       username: root
       password: password
