@@ -390,7 +390,7 @@ func getELOString(room chessRoom, whiteScore, blackScore float64, dbService *DBS
 		eloString += "发生错误，无法获取等级分。"
 		return eloString, err
 	}
-	eloString += fmt.Sprintf("%s：%d\n%s：%d\n", room.whiteName, whiteRate, room.blackName, blackRate)
+	eloString += fmt.Sprintf("%s：%d\n%s：%d\n\n", room.whiteName, whiteRate, room.blackName, blackRate)
 	return eloString, nil
 }
 
