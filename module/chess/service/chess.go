@@ -139,10 +139,11 @@ func Draw(groupCode int64, sender *message.Sender, logger logrus.FieldLogger) *m
 					logger.WithError(err).Error("Fail to create PGN.")
 				}
 				whiteScore, blackScore := 0.5, 0.5
-				eloString, err := getELOString(room, whiteScore, blackScore, dbService)
+				elo, err := getELOString(room, whiteScore, blackScore, dbService)
 				if err != nil {
 					logger.WithError(err).Error("Fail to get eloString. " + eloString)
 				}
+				eloString = elo
 			}
 			delete(instance.gameRooms, groupCode)
 			return textWithAt(sender.Uin, "接受和棋，游戏结束。\n"+eloString+chessString)
@@ -185,10 +186,11 @@ func Resign(groupCode int64, sender *message.Sender, logger logrus.FieldLogger) 
 				} else {
 					blackScore = 0.0
 				}
-				eloString, err := getELOString(room, whiteScore, blackScore, dbService)
+				elo, err := getELOString(room, whiteScore, blackScore, dbService)
 				if err != nil {
 					logger.WithError(err).Error("Fail to get eloString. " + eloString)
 				}
+				eloString = elo
 			}
 
 			delete(instance.gameRooms, groupCode)
@@ -265,10 +267,11 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 				if err := dbService.CreatePGN(chessString, room.whitePlayer, room.blackPlayer, room.whiteName, room.blackName); err != nil {
 					logger.WithError(err).Error("Fail to create PGN.")
 				}
-				eloString, err := getELOString(room, whiteScore, blackScore, dbService)
+				elo, err := getELOString(room, whiteScore, blackScore, dbService)
 				if err != nil {
 					logger.WithError(err).Error("Fail to get eloString. " + eloString)
 				}
+				eloString = elo
 			}
 			delete(instance.gameRooms, groupCode)
 			return simpleText(msg + eloString + chessString).Append(boardImgEle)
