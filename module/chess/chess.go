@@ -6,17 +6,40 @@ import (
 	"sync"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
-	"github.com/Logiase/MiraiGo-Template/config"
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
+	"github.com/aimerneige/MiraiChess/config"
+	"github.com/aimerneige/MiraiChess/module/chess/database"
 	"github.com/aimerneige/MiraiChess/module/chess/service"
+	"gopkg.in/yaml.v2"
 )
 
 var instance *chess
 var logger = utils.GetModuleLogger("aimerneige.chess")
-var disallowedGroup []int64
-var blacklistUser []int64
+
+var chessConfig struct {
+	Disallowed []int64 `json:"disallowed"`
+	BlackList  []int64 `json:"blacklist"`
+	ELO        struct {
+		Enable  bool `json:"enable"`
+		Default uint `json:"default"`
+		DB      struct {
+			Type  string `json:"type"`
+			MySQL struct {
+				Username string `json:"username"`
+				Password string `json:"password"`
+				Host     string `json:"host"`
+				Port     string `json:"port"`
+				Database string `json:"database"`
+				Charset  string `json:"charset"`
+			} `json:"mysql"`
+			SQLite struct {
+				Path string `json:"path"`
+			} `json:"sqlite"`
+		}
+	} `json:"elo"`
+}
 
 type chess struct {
 }
@@ -37,14 +60,13 @@ func (c *chess) MiraiGoModule() bot.ModuleInfo {
 // 在此处可以进行 Module 的初始化配置
 // 如配置读取
 func (c *chess) Init() {
-	// 读取配置文件并初始化 disallowedGroup
-	disallowedGroupSlice := config.GlobalConfig.GetIntSlice("chess.disallowed")
-	for _, group := range disallowedGroupSlice {
-		disallowedGroup = append(disallowedGroup, int64(group))
+	path := config.GlobalConfig.GetString("aimerneige.chess.path")
+	if path == "" {
+		path = "./chess.yaml"
 	}
-	blacklistUserSlice := config.GlobalConfig.GetIntSlice("chess.blacklist")
-	for _, user := range blacklistUserSlice {
-		blacklistUser = append(blacklistUser, int64(user))
+	bytes := utils.ReadFile(path)
+	if err := yaml.Unmarshal(bytes, &chessConfig); err != nil {
+		logger.WithError(err).Error("Unable to read config file in %s", path)
 	}
 }
 
@@ -52,6 +74,24 @@ func (c *chess) Init() {
 // 再次过程中可以进行跨 Module 的动作
 // 如通用数据库等等
 func (c *chess) PostInit() {
+	databaseType := chessConfig.ELO.DB.Type
+	switch databaseType {
+	case "mysql":
+		database.InitDatabase(database.MysqlDatabase{
+			UserName: chessConfig.ELO.DB.MySQL.Username,
+			Password: chessConfig.ELO.DB.MySQL.Password,
+			Host:     chessConfig.ELO.DB.MySQL.Host,
+			Port:     chessConfig.ELO.DB.MySQL.Port,
+			Database: chessConfig.ELO.DB.MySQL.Database,
+			CharSet:  chessConfig.ELO.DB.MySQL.Charset,
+		})
+	case "sqlite":
+		database.InitDatabase(database.SqliteDatabase{
+			FilePath: chessConfig.ELO.DB.SQLite.Path,
+		})
+	default:
+		logger.Fatal("Unsupported database type: " + databaseType)
+	}
 }
 
 // Serve 注册服务函数部分
@@ -117,7 +157,7 @@ func (c *chess) Stop(b *bot.Bot, wg *sync.WaitGroup) {
 }
 
 func isDisallowedGroupCode(grpCode int64) bool {
-	for _, v := range disallowedGroup {
+	for _, v := range chessConfig.Disallowed {
 		if grpCode == v {
 			return true
 		}
@@ -126,7 +166,7 @@ func isDisallowedGroupCode(grpCode int64) bool {
 }
 
 func inBlacklist(userID int64) bool {
-	for _, v := range blacklistUser {
+	for _, v := range chessConfig.BlackList {
 		if userID == v {
 			return true
 		}
