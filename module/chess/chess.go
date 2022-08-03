@@ -6,10 +6,10 @@ import (
 	"sync"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
+	"github.com/Logiase/MiraiGo-Template/config"
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
-	"github.com/aimerneige/MiraiChess/config"
 	"github.com/aimerneige/MiraiChess/module/chess/database"
 	"github.com/aimerneige/MiraiChess/module/chess/service"
 	"gopkg.in/yaml.v2"
@@ -68,29 +68,36 @@ func (c *chess) Init() {
 	if err := yaml.Unmarshal(bytes, &chessConfig); err != nil {
 		logger.WithError(err).Errorf("Unable to read config file in %s", path)
 	}
+	service.UpdateELOConfig(chessConfig.ELO.Enable, chessConfig.ELO.Default)
 }
 
 // PostInit 第二次初始化
 // 再次过程中可以进行跨 Module 的动作
 // 如通用数据库等等
 func (c *chess) PostInit() {
-	databaseType := chessConfig.ELO.DB.Type
-	switch databaseType {
-	case "mysql":
-		database.InitDatabase(database.MysqlDatabase{
-			UserName: chessConfig.ELO.DB.MySQL.Username,
-			Password: chessConfig.ELO.DB.MySQL.Password,
-			Host:     chessConfig.ELO.DB.MySQL.Host,
-			Port:     chessConfig.ELO.DB.MySQL.Port,
-			Database: chessConfig.ELO.DB.MySQL.Database,
-			CharSet:  chessConfig.ELO.DB.MySQL.Charset,
-		})
-	case "sqlite":
-		database.InitDatabase(database.SqliteDatabase{
-			FilePath: chessConfig.ELO.DB.SQLite.Path,
-		})
-	default:
-		logger.Fatal("Unsupported database type: " + databaseType)
+	if chessConfig.ELO.Enable {
+		databaseType := chessConfig.ELO.DB.Type
+		switch databaseType {
+		case "mysql":
+			mysqlDatabase := database.MysqlDatabase{
+				UserName: chessConfig.ELO.DB.MySQL.Username,
+				Password: chessConfig.ELO.DB.MySQL.Password,
+				Host:     chessConfig.ELO.DB.MySQL.Host,
+				Port:     chessConfig.ELO.DB.MySQL.Port,
+				Database: chessConfig.ELO.DB.MySQL.Database,
+				CharSet:  chessConfig.ELO.DB.MySQL.Charset,
+			}
+			database.InitDatabase(mysqlDatabase)
+			logger.Info("Init mysql database success ", mysqlDatabase)
+		case "sqlite":
+			sqliteDatabase := database.SqliteDatabase{
+				FilePath: chessConfig.ELO.DB.SQLite.Path,
+			}
+			database.InitDatabase(sqliteDatabase)
+			logger.Info("Init sqlite database success ", sqliteDatabase)
+		default:
+			logger.Fatal("Unsupported database type: " + databaseType)
+		}
 	}
 }
 
