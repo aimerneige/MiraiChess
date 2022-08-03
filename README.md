@@ -42,6 +42,7 @@ cd /opt/MiraiChess
 ```
 vim ./config/application.yaml
 vim ./config/autoreply.yaml
+vim ./config/chess.go
 ```
 
 运行启动脚本，下载依赖并确保机器人正常运行（必需至少运行一次启动脚本）：
@@ -72,7 +73,15 @@ systemctl enable mirai-chess.service
 
 下载解压 [release](https://github.com/aimerneige/MiraiChess/releases) 后直接执行 `update.sh` 即可。
 
+:warning: 升级脚本只简单地执行了如下任务：
+
+1. 关闭服务
+2. 替换新的可执行文件和脚本
+3. 重启服务
+
 更新脚本不会修改配置文件，当有功能更新时请注意手动更改配置文件。
+
+请不要依赖这个脚本，如果遇到问题请备份配置文件后重新安装。
 
 ## 如何编译
 
