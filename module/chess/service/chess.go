@@ -94,9 +94,11 @@ func Abort(c *client.QQClient, groupCode int64, sender *message.Sender, logger l
 		logger.WithError(err).Errorf("Fail to get group member info.")
 		return nil
 	}
+	// 不是管理员，忽略消息
 	if groupMemberInfo.Permission != client.Administrator && groupMemberInfo.Permission != client.Owner {
 		return nil
 	}
+	// 检查并处理对局
 	if room, ok := instance.gameRooms[groupCode]; ok {
 		room.chessGame.Draw(chess.DrawOffer)
 		chessString := getChessString(room)
@@ -158,6 +160,11 @@ func Resign(groupCode int64, sender *message.Sender, logger logrus.FieldLogger) 
 	if room, ok := instance.gameRooms[groupCode]; ok {
 		// 检查是否是当前游戏玩家
 		if sender.Uin == room.whitePlayer || sender.Uin == room.blackPlayer {
+			// 如果对局未建立，中断对局
+			if room.whitePlayer == 0 || room.blackPlayer == 0 {
+				delete(instance.gameRooms, groupCode)
+				return simpleText("对局已释放。")
+			}
 			var resignColor chess.Color
 			if sender.Uin == room.whitePlayer {
 				resignColor = chess.White
@@ -173,7 +180,6 @@ func Resign(groupCode int64, sender *message.Sender, logger logrus.FieldLogger) 
 			}
 			room.chessGame.Resign(resignColor)
 			chessString := getChessString(room)
-
 			eloString := ""
 			if eloEnabled && len(room.chessGame.Moves()) > 4 {
 				dbService := NewDBService(database.GetDB())
@@ -192,7 +198,6 @@ func Resign(groupCode int64, sender *message.Sender, logger logrus.FieldLogger) 
 				}
 				eloString = elo
 			}
-
 			delete(instance.gameRooms, groupCode)
 			if isAprilFoolsDay() {
 				return textWithAt(sender.Uin, "对手认输，游戏结束，你胜利了。\n"+eloString+chessString)
