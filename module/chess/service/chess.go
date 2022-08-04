@@ -133,7 +133,7 @@ func Draw(groupCode int64, sender *message.Sender, logger logrus.FieldLogger) *m
 			room.chessGame.Draw(chess.DrawOffer)
 			chessString := getChessString(room)
 			eloString := ""
-			if eloEnabled {
+			if eloEnabled && len(room.chessGame.Moves()) > 4 {
 				dbService := NewDBService(database.GetDB())
 				if err := dbService.CreatePGN(chessString, room.whitePlayer, room.blackPlayer, room.whiteName, room.blackName); err != nil {
 					logger.WithError(err).Error("Fail to create PGN.")
@@ -175,7 +175,7 @@ func Resign(groupCode int64, sender *message.Sender, logger logrus.FieldLogger) 
 			chessString := getChessString(room)
 
 			eloString := ""
-			if eloEnabled {
+			if eloEnabled && len(room.chessGame.Moves()) > 4 {
 				dbService := NewDBService(database.GetDB())
 				if err := dbService.CreatePGN(chessString, room.whitePlayer, room.blackPlayer, room.whiteName, room.blackName); err != nil {
 					logger.WithError(err).Error("Fail to create PGN.")
@@ -262,7 +262,7 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 			}
 			chessString := getChessString(room)
 			eloString := ""
-			if eloEnabled {
+			if eloEnabled && len(room.chessGame.Moves()) > 4 {
 				dbService := NewDBService(database.GetDB())
 				if err := dbService.CreatePGN(chessString, room.whitePlayer, room.blackPlayer, room.whiteName, room.blackName); err != nil {
 					logger.WithError(err).Error("Fail to create PGN.")
