@@ -22,7 +22,7 @@ const board2svgScriptPath string = "./scripts/board2svg.py"
 
 var instance *chessService
 var eloEnabled bool = false
-var eloDefault uint = 500
+var eloDefault int = 500
 
 type chessService struct {
 	gameRooms map[int64]chessRoom
@@ -44,7 +44,7 @@ func init() {
 }
 
 // UpdateELOConfig update elo config
-func UpdateELOConfig(enabled bool, defaultValue uint) {
+func UpdateELOConfig(enabled bool, defaultValue int) {
 	eloEnabled = enabled
 	eloDefault = defaultValue
 }
@@ -436,7 +436,7 @@ func updateELORate(whiteUin, blackUin int64, whiteName, blackName string, whiteS
 }
 
 // getELORate 获取玩家的 ELO 等级分
-func getELORate(whiteUin, blackUin int64, dbService *DBService) (whiteRate uint, blackRate uint, err error) {
+func getELORate(whiteUin, blackUin int64, dbService *DBService) (whiteRate int, blackRate int, err error) {
 	whiteRate, err = dbService.GetELORateByUin(whiteUin)
 	if err != nil {
 		return

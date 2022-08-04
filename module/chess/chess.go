@@ -23,7 +23,7 @@ var chessConfig struct {
 	BlackList  []int64 `json:"blacklist"`
 	ELO        struct {
 		Enable  bool `json:"enable"`
-		Default uint `json:"default"`
+		Default int  `json:"default"`
 		DB      struct {
 			Type  string `json:"type"`
 			MySQL struct {

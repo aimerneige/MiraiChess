@@ -5,7 +5,7 @@ import (
 )
 
 // CalculateNewRate calculate new rate of the player
-func CalculateNewRate(whiteRate, blackRate uint, whiteScore, blackScore float64) (uint, uint) {
+func CalculateNewRate(whiteRate, blackRate int, whiteScore, blackScore float64) (int, int) {
 	k := getKFactor(whiteRate, blackRate)
 	exceptionWhite := calculateException(whiteRate, blackRate)
 	exceptionBlack := calculateException(blackRate, whiteRate)
@@ -14,19 +14,19 @@ func CalculateNewRate(whiteRate, blackRate uint, whiteScore, blackScore float64)
 	return whiteRate, blackRate
 }
 
-func calculateException(rate uint, opponentRate uint) float64 {
-	return 1 / (1 + math.Pow(10, float64(opponentRate-rate)/400))
+func calculateException(rate int, opponentRate int) float64 {
+	return 1.0 / (1.0 + math.Pow(10.0, float64(opponentRate-rate)/400.0))
 }
 
-func calculateRate(rate uint, score float64, exception float64, k uint) uint {
-	newRate := uint(math.Round(float64(rate) + float64(k)*(score-exception)))
+func calculateRate(rate int, score float64, exception float64, k int) int {
+	newRate := int(math.Round(float64(rate) + float64(k)*(score-exception)))
 	if newRate < 1 {
 		newRate = 1
 	}
 	return newRate
 }
 
-func getKFactor(rateA, rateB uint) uint {
+func getKFactor(rateA, rateB int) int {
 	if rateA > 2400 && rateB > 2400 {
 		return 16
 	}

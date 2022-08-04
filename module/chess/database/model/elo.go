@@ -7,5 +7,5 @@ type ELO struct {
 	gorm.Model
 	Uin  int64 `gorm:"unique_index"`
 	Name string
-	Rate uint
+	Rate int
 }

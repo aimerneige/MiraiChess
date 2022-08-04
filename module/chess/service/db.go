@@ -18,7 +18,7 @@ func NewDBService(db *gorm.DB) *DBService {
 }
 
 // CreateELO 创建 ELO
-func (s *DBService) CreateELO(uin int64, name string, rate uint) error {
+func (s *DBService) CreateELO(uin int64, name string, rate int) error {
 	return s.db.Create(&model.ELO{
 		Uin:  uin,
 		Name: name,
@@ -34,14 +34,14 @@ func (s *DBService) GetELOByUin(uin int64) (model.ELO, error) {
 }
 
 // GetELORateByUin 获取 ELO 等级分
-func (s *DBService) GetELORateByUin(uin int64) (uint, error) {
+func (s *DBService) GetELORateByUin(uin int64) (int, error) {
 	var elo model.ELO
 	err := s.db.Select("rate").Where("uin = ?", uin).First(&elo).Error
 	return elo.Rate, err
 }
 
 // UpdateELOByUin 更新 ELO 等级分
-func (s *DBService) UpdateELOByUin(uin int64, name string, rate uint) error {
+func (s *DBService) UpdateELOByUin(uin int64, name string, rate int) error {
 	return s.db.Model(&model.ELO{}).Where("uin = ?", uin).Update("name", name).Update("rate", rate).Error
 }
 
