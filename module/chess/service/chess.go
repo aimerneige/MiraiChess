@@ -423,7 +423,7 @@ func getRankingString(dbService *DBService) (string, error) {
 	}
 	ret := "当前等级分排行榜：\n\n"
 	for _, elo := range eloList {
-		ret += fmt.Sprintf("%s: %d", elo.Name, elo.Rate)
+		ret += fmt.Sprintf("%s: %d\n", elo.Name, elo.Rate)
 	}
 	return ret, nil
 }
