@@ -313,6 +313,9 @@ func Cheese(c *client.QQClient, groupCode int64, logger logrus.FieldLogger) *mes
 
 // Ranking 排行榜
 func Ranking(c *client.QQClient, groupCode int64, logger logrus.FieldLogger) *message.SendingMessage {
+	if !eloEnabled {
+		return nil
+	}
 	dbService := NewDBService(database.GetDB())
 	ranking, err := getRankingString(dbService)
 	if err != nil {
