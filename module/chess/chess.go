@@ -136,6 +136,8 @@ func (c *chess) Serve(b *bot.Bot) {
 			replyMsg = service.Play(c, msg.GroupCode, msg.Sender, moveStr, logger)
 		case msgString == "cheese":
 			replyMsg = service.Cheese(c, msg.GroupCode, logger)
+		case msgString == "排行榜" || msgString == "ranking":
+			replyMsg = service.Ranking(c, msg.GroupCode, logger)
 		default:
 			return
 		}
@@ -147,7 +149,9 @@ func (c *chess) Serve(b *bot.Bot) {
 
 // Start 此函数会新开携程进行调用
 // ```go
-// 		go exampleModule.Start()
+//
+//	go exampleModule.Start()
+//
 // ```
 // 可以利用此部分进行后台操作
 // 如 http 服务器等等

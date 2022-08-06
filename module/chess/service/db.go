@@ -40,6 +40,13 @@ func (s *DBService) GetELORateByUin(uin int64) (int, error) {
 	return elo.Rate, err
 }
 
+// GetHighestRateList 获取最高的等级分列表
+func (s *DBService) GetHighestRateList() ([]model.ELO, error) {
+	var eloList []model.ELO
+	err := s.db.Order("rate desc").Limit(10).Find(&eloList).Error
+	return eloList, err
+}
+
 // UpdateELOByUin 更新 ELO 等级分
 func (s *DBService) UpdateELOByUin(uin int64, name string, rate int) error {
 	return s.db.Model(&model.ELO{}).Where("uin = ?", uin).Update("name", name).Update("rate", rate).Error

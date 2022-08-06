@@ -311,6 +311,17 @@ func Cheese(c *client.QQClient, groupCode int64, logger logrus.FieldLogger) *mes
 	return simpleText("Chess Cheese Cheese Chess").Append(ele)
 }
 
+// Ranking 排行榜
+func Ranking(c *client.QQClient, groupCode int64, logger logrus.FieldLogger) *message.SendingMessage {
+	dbService := NewDBService(database.GetDB())
+	ranking, err := getRankingString(dbService)
+	if err != nil {
+		logger.WithError(err).Errorf("Fail to get ranking string")
+		return simpleText("服务器错误，无法获取排行榜信息。请联系开发者修 bug。\n反馈地址 https://github.com/aimerneige/MiraiChess/issues\n")
+	}
+	return simpleText(ranking)
+}
+
 func errorText(errMsg string) *message.SendingMessage {
 	return simpleText("发生错误，请联系开发者修 bug。\n反馈地址 https://github.com/aimerneige/MiraiChess/issues\n错误信息：" + errMsg)
 }
@@ -400,6 +411,18 @@ func getELOString(room chessRoom, whiteScore, blackScore float64, dbService *DBS
 	}
 	eloString += fmt.Sprintf("%s：%d\n%s：%d\n\n", room.whiteName, whiteRate, room.blackName, blackRate)
 	return eloString, nil
+}
+
+func getRankingString(dbService *DBService) (string, error) {
+	eloList, err := dbService.GetHighestRateList()
+	if err != nil {
+		return "", err
+	}
+	ret := "当前等级分排行榜：\n\n"
+	for _, elo := range eloList {
+		ret += fmt.Sprintf("%s: %d", elo.Name, elo.Rate)
+	}
+	return ret, nil
 }
 
 // updateELORate 更新 elo 等级分
