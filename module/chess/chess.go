@@ -134,10 +134,12 @@ func (c *chess) Serve(b *bot.Bot) {
 				return
 			}
 			replyMsg = service.Play(c, msg.GroupCode, msg.Sender, moveStr, logger)
+		case msgString == "排行榜" || msgString == "ranking":
+			replyMsg = service.Ranking(c, logger)
+		case msgString == "等级分" || msgString == "rate":
+			replyMsg = service.Rate(c, msg.Sender, logger)
 		case msgString == "cheese":
 			replyMsg = service.Cheese(c, msg.GroupCode, logger)
-		case msgString == "排行榜" || msgString == "ranking":
-			replyMsg = service.Ranking(c, msg.GroupCode, logger)
 		default:
 			return
 		}

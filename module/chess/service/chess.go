@@ -312,7 +312,7 @@ func Cheese(c *client.QQClient, groupCode int64, logger logrus.FieldLogger) *mes
 }
 
 // Ranking 排行榜
-func Ranking(c *client.QQClient, groupCode int64, logger logrus.FieldLogger) *message.SendingMessage {
+func Ranking(c *client.QQClient, logger logrus.FieldLogger) *message.SendingMessage {
 	if !eloEnabled {
 		return nil
 	}
@@ -323,6 +323,20 @@ func Ranking(c *client.QQClient, groupCode int64, logger logrus.FieldLogger) *me
 		return simpleText("服务器错误，无法获取排行榜信息。请联系开发者修 bug。\n反馈地址 https://github.com/aimerneige/MiraiChess/issues\n")
 	}
 	return simpleText(ranking)
+}
+
+// Rate 获取等级分
+func Rate(c *client.QQClient, sender *message.Sender, logger logrus.FieldLogger) *message.SendingMessage {
+	if !eloEnabled {
+		return nil
+	}
+	dbService := NewDBService(database.GetDB())
+	rate, err := dbService.GetELORateByUin(sender.Uin)
+	if err != nil {
+		logger.WithError(err).Errorf("Fail to get player rank")
+		return simpleText("服务器错误，无法获取等级分信息。请联系开发者修 bug。\n反馈地址 https://github.com/aimerneige/MiraiChess/issues\n")
+	}
+	return simpleText(fmt.Sprintf("玩家%s目前的等级分：%d", sender.Nickname, rate))
 }
 
 func errorText(errMsg string) *message.SendingMessage {
