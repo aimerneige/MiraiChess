@@ -33,7 +33,7 @@ pip install python-chess
 
 ```bash
 mkdir -p /opt/MiraiChess
-tar -xzvf MiraiChess-linux-amd64-v1.6.3.tar.gz -C /opt/MiraiChess
+tar -xzvf MiraiChess-linux-amd64-v1.6.4.tar.gz -C /opt/MiraiChess
 cd /opt/MiraiChess
 ```
 
