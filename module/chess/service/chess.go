@@ -1,6 +1,8 @@
 package service
 
 import (
+	"bytes"
+	_ "embed" // embed for cheese
 	"fmt"
 	"os"
 	"os/exec"
@@ -15,10 +17,15 @@ import (
 	"gorm.io/gorm"
 )
 
+//go:embed asserts/cheese.jpeg
+var cheeseData []byte
+
+//go:embed board2svg.py
+var pythonScript string
+
 const inkscapePath string = "./bin/inkscape"
 const tempFileDir string = "./temp/"
 const cheeseFilePath string = "./img/cheese.jpeg"
-const board2svgScriptPath string = "./scripts/board2svg.py"
 
 var instance *chessService
 var eloEnabled bool = false
@@ -295,15 +302,8 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 
 // Cheese Easter Egg
 func Cheese(c *client.QQClient, groupCode int64, logger logrus.FieldLogger) *message.SendingMessage {
-	// 读取图片
-	f, err := os.Open(cheeseFilePath)
-	if err != nil {
-		logger.WithError(err).Errorf("Unable to read open image file in %s.", cheeseFilePath)
-		return nil
-	}
-	defer f.Close()
 	// 上传图片
-	ele, err := c.UploadGroupImage(groupCode, f)
+	ele, err := c.UploadGroupImage(groupCode, bytes.NewReader(cheeseData))
 	if err != nil {
 		logger.WithError(err).Error("Unable to upload image.")
 		return nil
@@ -370,8 +370,8 @@ func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLog
 		svgFilePath := path.Join(tempFileDir, fmt.Sprintf("%d.svg", groupCode))
 		pngFilePath := path.Join(tempFileDir, fmt.Sprintf("%d.png", groupCode))
 		// 调用 python 脚本生成 svg 文件
-		if err := exec.Command(board2svgScriptPath, room.chessGame.FEN(), svgFilePath, uciStr).Run(); err != nil {
-			logger.Info(board2svgScriptPath, " ", room.chessGame.FEN(), " ", svgFilePath, " ", uciStr)
+		if err := exec.Command("python", "-c", pythonScript, room.chessGame.FEN(), svgFilePath, uciStr).Run(); err != nil {
+			logger.Info("python", "-c", pythonScript, room.chessGame.FEN(), " ", svgFilePath, " ", uciStr)
 			logger.WithError(err).Error("Unable to generate svg file.")
 			return nil, false, "无法生成 svg 图片"
 		}
