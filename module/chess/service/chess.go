@@ -332,6 +332,9 @@ func Rate(c *client.QQClient, sender *message.Sender, logger logrus.FieldLogger)
 	}
 	dbService := NewDBService(database.GetDB())
 	rate, err := dbService.GetELORateByUin(sender.Uin)
+	if err == gorm.ErrRecordNotFound {
+		return simpleText("没有查找到等级分信息。请至少进行一局对局。")
+	}
 	if err != nil {
 		logger.WithError(err).Errorf("Fail to get player rank")
 		return simpleText("服务器错误，无法获取等级分信息。请联系开发者修 bug。\n反馈地址 https://github.com/aimerneige/MiraiChess/issues\n")
