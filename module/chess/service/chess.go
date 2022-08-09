@@ -20,7 +20,7 @@ import (
 //go:embed asserts/cheese.jpeg
 var cheeseData []byte
 
-//go:embed board2svg.py
+//go:embed scripts/board2svg.py
 var pythonScript string
 
 const inkscapePath string = "./bin/inkscape"
