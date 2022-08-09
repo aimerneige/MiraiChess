@@ -37,7 +37,7 @@ var chessConfig struct {
 			SQLite struct {
 				Path string `json:"path"`
 			} `json:"sqlite"`
-		}
+		} `json:"db"`
 	} `json:"elo"`
 }
 
