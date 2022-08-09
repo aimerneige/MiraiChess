@@ -39,6 +39,8 @@ var chessConfig struct {
 			} `json:"sqlite"`
 		} `json:"db"`
 	} `json:"elo"`
+	Inkscape string `json:"inkscape"`
+	Temp     string `json:"temp"`
 }
 
 type chess struct {
@@ -69,6 +71,7 @@ func (c *chess) Init() {
 		logger.WithError(err).Errorf("Unable to read config file in %s", path)
 	}
 	service.UpdateELOConfig(chessConfig.ELO.Enable, chessConfig.ELO.Default)
+	service.UpdateFSConfig(chessConfig.Inkscape, chessConfig.Temp)
 }
 
 // PostInit 第二次初始化

@@ -17,3 +17,5 @@ elo:
       charset: utf8mb4
     sqlite:
       path: "./db/chess.db"
+inkscape: "./bin/inkscape"
+temp: "./temp/"

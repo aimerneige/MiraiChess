@@ -23,13 +23,11 @@ var cheeseData []byte
 //go:embed scripts/board2svg.py
 var pythonScript string
 
-const inkscapePath string = "./bin/inkscape"
-const tempFileDir string = "./temp/"
-const cheeseFilePath string = "./img/cheese.jpeg"
-
 var instance *chessService
-var eloEnabled bool = false
-var eloDefault int = 500
+var inkscapePath string
+var tempFileDir string
+var eloEnabled bool
+var eloDefault int
 
 type chessService struct {
 	gameRooms map[int64]chessRoom
@@ -48,6 +46,12 @@ func init() {
 	instance = &chessService{
 		gameRooms: make(map[int64]chessRoom, 1),
 	}
+}
+
+// UpdateFSConfig update fs config
+func UpdateFSConfig(inkscape, temp string) {
+	inkscapePath = inkscape
+	tempFileDir = temp
 }
 
 // UpdateELOConfig update elo config
