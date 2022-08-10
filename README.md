@@ -134,8 +134,6 @@ make run
 
 如果你希望以模块化的方式将本 bot 集成到已有项目中，可以使用如下仓库：
 
-> :warning: 还在开发中，开发进度详见 [issue 5](https://github.com/aimerneige/MiraiChess/issues/5)
-
 [MiraiGo-module-chess](https://github.com/yukichan-bot-module/MiraiGo-module-chess)
 
 ## 交流群
