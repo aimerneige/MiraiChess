@@ -18,13 +18,9 @@ cp ./config/*.yaml ./release/$TARGET/config
 
 mkdir ./release/$TARGET/db
 
-mkdir ./release/$TARGET/img
-cp ./img/cheese.jpeg ./release/$TARGET/img
-
 mkdir ./release/$TARGET/logs
 
 mkdir ./release/$TARGET/scripts
-cp ./scripts/board2svg.py ./release/$TARGET/scripts
 cp ./scripts/download_inkscape.sh ./release/$TARGET/scripts
 cp ./scripts/start.sh ./release/$TARGET
 cp ./scripts/update.sh ./release/$TARGET
