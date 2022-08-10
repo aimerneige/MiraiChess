@@ -165,6 +165,5 @@ make run
 ## 开源相关
 
 - [MiraiGo-Template](https://github.com/Logiase/MiraiGo-Template)
-- [MiraiGo-module-autoreply](https://github.com/Logiase/MiraiGo-module-autoreply)
 - [chess](https://github.com/notnil/chess)
 - [python-chess](https://github.com/niklasf/python-chess)
