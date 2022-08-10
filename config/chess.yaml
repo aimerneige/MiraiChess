@@ -1,12 +1,12 @@
-disallowed:
+disallowed: # 不提供服务的群聊列表
   - 741535071
   - 731500560
-blacklist:
+blacklist: # 黑名单用户列表
   - 1781924496
 elo:
-  enable: false
-  default: 500
-  db:
+  enable: false # 是否启用 elo 等级分计算功能
+  default: 500 # 玩家默认等级分
+  db: # 数据库
     type: sqlite # mysql | sqlite
     mysql:
       username: root
@@ -17,5 +17,5 @@ elo:
       charset: utf8mb4
     sqlite:
       path: "./db/chess.db"
-inkscape: "./bin/inkscape"
-temp: "./temp/"
+inkscape: "./bin/inkscape" # inkscape 可执行文件路径
+temp: "./temp/" # 临时文件夹，用于存放脚本生成的棋盘图片
