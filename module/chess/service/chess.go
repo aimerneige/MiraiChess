@@ -383,7 +383,7 @@ func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLog
 		pngFilePath := path.Join(tempFileDir, fmt.Sprintf("%d.png", groupCode))
 		// 调用 python 脚本生成 svg 文件
 		if err := exec.Command("python", "-c", pythonScript, room.chessGame.FEN(), svgFilePath, uciStr).Run(); err != nil {
-			logger.Info("python", "-c", pythonScript, room.chessGame.FEN(), " ", svgFilePath, " ", uciStr)
+			logger.Info("python", " ", "-c", " ", pythonScript, " ", room.chessGame.FEN(), " ", svgFilePath, " ", uciStr)
 			logger.WithError(err).Error("Unable to generate svg file.")
 			return nil, false, "无法生成 svg 图片"
 		}
