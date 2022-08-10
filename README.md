@@ -149,7 +149,7 @@ make run
 - [x] 提供 service 文件
 - [ ] 提供 docker 支持
 - [x] 完善文档
-- [ ] 模块化支持
+- [x] 模块化支持
 
 ## LICENSE
 
