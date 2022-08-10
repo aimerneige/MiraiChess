@@ -9,7 +9,6 @@ import (
 	"github.com/Logiase/MiraiGo-Template/utils"
 
 	_ "github.com/Logiase/MiraiGo-Template/modules/logging"
-	_ "github.com/Logiase/MiraiGo-module-autoreply"
 	_ "github.com/aimerneige/MiraiChess/module/chess"
 )
 

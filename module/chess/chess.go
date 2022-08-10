@@ -141,6 +141,8 @@ func (c *chess) Serve(b *bot.Bot) {
 			replyMsg = service.Ranking(c, logger)
 		case msgString == "等级分" || msgString == "rate":
 			replyMsg = service.Rate(c, msg.Sender, logger)
+		case msgString == "帮助" || msgString == "help":
+			replyMsg = service.Help()
 		case msgString == "cheese":
 			replyMsg = service.Cheese(c, msg.GroupCode, logger)
 		default:

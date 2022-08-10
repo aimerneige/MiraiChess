@@ -20,6 +20,9 @@ import (
 //go:embed asserts/cheese.jpeg
 var cheeseData []byte
 
+//go:embed asserts/help.txt
+var helpString string
+
 //go:embed scripts/board2svg.py
 var pythonScript string
 
@@ -313,6 +316,11 @@ func Cheese(c *client.QQClient, groupCode int64, logger logrus.FieldLogger) *mes
 		return nil
 	}
 	return simpleText("Chess Cheese Cheese Chess").Append(ele)
+}
+
+// Help 帮助信息
+func Help() *message.SendingMessage {
+	return simpleText(helpString)
 }
 
 // Ranking 排行榜

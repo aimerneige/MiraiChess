@@ -1,8 +1,5 @@
 bot:
   loginmethod: qrcode
-logiase:
-  autoreply:
-    path: "./config/autoreply.yaml"
 aimerneige:
   chess:
     path: "./config/chess.yaml"
