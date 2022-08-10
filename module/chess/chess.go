@@ -194,7 +194,7 @@ func isCorrectMoveStr(moveStr string) bool {
 	if len(moveStr) == 0 {
 		return false
 	}
-	const PATTERN = "([0-9]|[A-Z]|[a-z])+"
-	reg := regexp.MustCompile(moveStr)
-	return reg.MatchString(moveStr)
+	const PATTERN = "([0-9]|[A-Z]|[a-z]|=|-)+"
+	reg := regexp.MustCompile(PATTERN)
+	return reg.FindString(moveStr) == moveStr
 }
