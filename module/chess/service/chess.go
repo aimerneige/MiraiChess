@@ -17,10 +17,10 @@ import (
 	"gorm.io/gorm"
 )
 
-//go:embed asserts/cheese.jpeg
+//go:embed assets/cheese.jpeg
 var cheeseData []byte
 
-//go:embed asserts/help.txt
+//go:embed assets/help.txt
 var helpString string
 
 //go:embed scripts/board2svg.py
