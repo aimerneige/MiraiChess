@@ -8,8 +8,8 @@ import (
 	"github.com/Logiase/MiraiGo-Template/config"
 	"github.com/Logiase/MiraiGo-Template/utils"
 
-	_ "github.com/Logiase/MiraiGo-Template/modules/logging"
 	_ "github.com/aimerneige/MiraiChess/module/chess"
+	_ "github.com/aimerneige/MiraiChess/module/logging"
 )
 
 func init() {
