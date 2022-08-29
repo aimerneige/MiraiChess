@@ -16,7 +16,7 @@ import (
 )
 
 var instance *chess
-var logger = utils.GetModuleLogger("aimerneige.chess")
+var logger = utils.GetModuleLogger("com.aimerneige.chess")
 
 var chessConfig struct {
 	Disallowed []int64 `json:"disallowed"`
@@ -53,7 +53,7 @@ func init() {
 
 func (c *chess) MiraiGoModule() bot.ModuleInfo {
 	return bot.ModuleInfo{
-		ID:       "aimerneige.chess",
+		ID:       "com.aimerneige.chess",
 		Instance: instance,
 	}
 }
@@ -106,7 +106,7 @@ func (c *chess) PostInit() {
 
 // Serve 注册服务函数部分
 func (c *chess) Serve(b *bot.Bot) {
-	b.OnGroupMessage(func(c *client.QQClient, msg *message.GroupMessage) {
+	b.GroupMessageEvent.Subscribe(func(c *client.QQClient, msg *message.GroupMessage) {
 		// 判断是否在黑名单中，如果是则忽略消息
 		if inBlacklist(msg.Sender.Uin) {
 			return

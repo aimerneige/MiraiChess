@@ -12,6 +12,12 @@
 
 I assume that most of the users of this repo are Chinese, so there will be no English support for README and documents. If you need, post a issue.
 
+## 模块化支持
+
+如果你希望以模块化的方式将本 bot 集成到已有项目中，可以使用如下仓库：
+
+[MiraiGo-module-chess](https://github.com/yukichan-bot-module/MiraiGo-module-chess)
+
 ## 如何使用
 
 ### 安装
@@ -41,7 +47,6 @@ cd /opt/MiraiChess
 
 ```
 vim ./config/application.yaml
-vim ./config/autoreply.yaml
 vim ./config/chess.go
 ```
 
@@ -129,12 +134,6 @@ make run
 ### 是否支持 Windows
 
 项目代码本身可以编译 Windows 版本，但在 svg 转 png 时用到了 [inkscape](https://inkscape.org/)，该软件提供 Windows 版本但本项目没有测试其可用性，如果您有这方面的需求，可以尝试在 Windows 下调用 inkscape 或重写 svg 转 png 的相关代码。（PR WELCOME）
-
-## 模块化支持
-
-如果你希望以模块化的方式将本 bot 集成到已有项目中，可以使用如下仓库：
-
-[MiraiGo-module-chess](https://github.com/yukichan-bot-module/MiraiGo-module-chess)
 
 ## 交流群
 

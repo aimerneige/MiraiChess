@@ -37,6 +37,3 @@ clean:
 	-rm -rvf bin/mirai-chess-bot-*
 	-rm -rvf bin/device
 	-rm -rvf release/*.tar.gz
-
-updatedep:
-	go mod tidy -compat=1.17
