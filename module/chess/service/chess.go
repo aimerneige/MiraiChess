@@ -37,12 +37,13 @@ type chessService struct {
 }
 
 type chessRoom struct {
-	chessGame   *chess.Game
-	whitePlayer int64
-	whiteName   string
-	blackPlayer int64
-	blackName   string
-	drawPlayer  int64
+	chessGame    *chess.Game
+	whitePlayer  int64
+	whiteName    string
+	blackPlayer  int64
+	blackName    string
+	drawPlayer   int64
+	lastMoveTime int64
 }
 
 func init() {
@@ -67,6 +68,11 @@ func UpdateELOConfig(enabled bool, defaultValue int) {
 func Game(c *client.QQClient, groupCode int64, sender *message.Sender, logger logrus.FieldLogger) *message.SendingMessage {
 	if room, ok := instance.gameRooms[groupCode]; ok {
 		if room.blackPlayer != 0 {
+			// 检测对局是否已存在超过 6 小时
+			if (time.Now().Unix() - room.lastMoveTime) > 21600 {
+				return abortGame(groupCode, "对局已存在超过 6 小时，游戏结束。", logger).Append(message.NewText("\n\n已有对局已被中断，如需创建新对局请重新发送指令。")).Append(message.NewAt(sender.Uin))
+			}
+			// 对局在进行
 			msg := textWithAt(sender.Uin, "对局已在进行中，无法创建或加入对局，当前对局玩家为：")
 			if room.whitePlayer != 0 {
 				msg.Append(message.NewAt(room.whitePlayer))
@@ -90,12 +96,13 @@ func Game(c *client.QQClient, groupCode int64, sender *message.Sender, logger lo
 		return simpleText("黑棋已加入对局，请白方下棋。").Append(message.NewAt(room.whitePlayer)).Append(boardImgEle)
 	}
 	instance.gameRooms[groupCode] = chessRoom{
-		chessGame:   chess.NewGame(),
-		whitePlayer: sender.Uin,
-		whiteName:   sender.Nickname,
-		blackPlayer: 0,
-		blackName:   "",
-		drawPlayer:  0,
+		chessGame:    chess.NewGame(),
+		whitePlayer:  sender.Uin,
+		whiteName:    sender.Nickname,
+		blackPlayer:  0,
+		blackName:    "",
+		drawPlayer:   0,
+		lastMoveTime: time.Now().Unix(),
 	}
 	return simpleText("已创建新的对局，发送「下棋」或「chess」可加入对局。")
 }
@@ -113,23 +120,8 @@ func Abort(c *client.QQClient, groupCode int64, sender *message.Sender, logger l
 		return nil
 	}
 	// 检查并处理对局
-	if room, ok := instance.gameRooms[groupCode]; ok {
-		room.chessGame.Draw(chess.DrawOffer)
-		chessString := getChessString(room)
-		dbService := NewDBService(database.GetDB())
-		if err := dbService.CreatePGN(chessString, room.whitePlayer, room.blackPlayer, room.whiteName, room.blackName); err != nil {
-			logger.WithError(err).Error("Fail to create PGN.")
-		}
-		delete(instance.gameRooms, groupCode)
-		msg := simpleText("对局已被管理员中断，游戏结束。")
-		if room.whitePlayer != 0 {
-			msg.Append(message.NewAt(room.whitePlayer))
-		}
-		if room.blackPlayer != 0 {
-			msg.Append(message.NewAt(room.blackPlayer))
-		}
-		msg.Append(message.NewText("\n\n" + chessString))
-		return msg
+	if _, ok := instance.gameRooms[groupCode]; ok {
+		return abortGame(groupCode, "对局已被管理员中断，游戏结束。", logger)
 	}
 	return simpleText("对局不存在，发送「下棋」或「chess」可创建对局。")
 }
@@ -138,6 +130,7 @@ func Abort(c *client.QQClient, groupCode int64, sender *message.Sender, logger l
 func Draw(groupCode int64, sender *message.Sender, logger logrus.FieldLogger) *message.SendingMessage {
 	if room, ok := instance.gameRooms[groupCode]; ok {
 		if sender.Uin == room.whitePlayer || sender.Uin == room.blackPlayer {
+			room.lastMoveTime = time.Now().Unix()
 			if room.drawPlayer == 0 {
 				room.drawPlayer = sender.Uin
 				instance.gameRooms[groupCode] = room
@@ -238,6 +231,7 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 		if ((sender.Uin == room.whitePlayer) && (room.chessGame.Position().Turn() != chess.White)) || ((sender.Uin == room.blackPlayer) && (room.chessGame.Position().Turn() != chess.Black)) {
 			return textWithAt(sender.Uin, "请等待对手走棋。")
 		}
+		room.lastMoveTime = time.Now().Unix()
 		// 走棋
 		if err := room.chessGame.MoveStr(moveStr); err != nil {
 			return simpleText(fmt.Sprintf("移动「%s」违规，请检查，格式请参考「代数记谱法」(Algebraic notation)。", moveStr))
@@ -367,6 +361,28 @@ func textWithAt(target int64, msg string) *message.SendingMessage {
 		return simpleText("@全体成员 " + msg)
 	}
 	return message.NewSendingMessage().Append(message.NewAt(target)).Append(message.NewText(msg))
+}
+
+func abortGame(groupCode int64, hint string, logger logrus.FieldLogger) *message.SendingMessage {
+	room := instance.gameRooms[groupCode]
+	room.chessGame.Draw(chess.DrawOffer)
+	chessString := getChessString(room)
+	if eloEnabled && len(room.chessGame.Moves()) > 4 {
+		dbService := NewDBService(database.GetDB())
+		if err := dbService.CreatePGN(chessString, room.whitePlayer, room.blackPlayer, room.whiteName, room.blackName); err != nil {
+			logger.WithError(err).Error("Fail to create PGN.")
+		}
+	}
+	delete(instance.gameRooms, groupCode)
+	msg := simpleText(hint)
+	if room.whitePlayer != 0 {
+		msg.Append(message.NewAt(room.whitePlayer))
+	}
+	if room.blackPlayer != 0 {
+		msg.Append(message.NewAt(room.blackPlayer))
+	}
+	msg.Append(message.NewText("\n\n" + chessString))
+	return msg
 }
 
 func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLogger) (*message.GroupImageElement, bool, string) {
