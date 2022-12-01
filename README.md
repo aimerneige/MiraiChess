@@ -142,7 +142,42 @@ make run
 
 ### 是否支持 Windows
 
-正在开发，可以查看 [#11](https://github.com/aimerneige/MiraiChess/issues/11) 追踪开发进度。
+本项目只建议使用 Linux 服务器运行本项目，如果你一定要使用 Windows，请按照下面的方法安装使用：
+
+#### 安装依赖
+
+1. [inkscape](https://inkscape.org/release/)
+2. [python](https://www.python.org/downloads/)
+3. [python-chess](https://github.com/niklasf/python-chess)
+
+#### 编译
+
+将本项目 clone 之后，在项目路径下执行如下指令：
+
+```bash
+go build -o bin/device.exe cmd/device/device.go
+go build -o bin/bot.exe cmd/bot/bot.go
+```
+
+注意，编译本项目需要安装配置 Go 和 MinGW
+
+#### 修改配置文件
+
+在 `config/chess.yaml` 文件中修改 inkscape 可执行文件路径为安装路径。
+
+#### 生成设备文件
+
+在项目路径下执行 `device.exe`
+
+```bat
+.\bin\device.exe
+```
+
+#### 启动机器人
+
+```bat
+.\bin\bot.exe
+```
 
 ## 交流群
 
