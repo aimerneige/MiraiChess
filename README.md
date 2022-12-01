@@ -81,8 +81,9 @@ systemctl enable mirai-chess.service
 :warning: 升级脚本只简单地执行了如下任务：
 
 1. 关闭服务
-2. 替换新的可执行文件和脚本
-3. 重启服务
+2. 替换新的可执行文件
+3. 替换 README 文件
+4. 重启服务
 
 更新脚本不会修改配置文件，当有功能更新时请注意手动更改配置文件。
 
@@ -131,9 +132,17 @@ make run
 
 可以尝试换个帐号，腾讯的风控很玄学的，本项目也没有什么好的办法。
 
+以下是个人总结的一些玄学方法：
+
+1. 尽量不要使用刚注册的小号
+2. 帐号要实名并绑定手机号
+3. 开启设备锁、人脸识别等安全工具
+4. 不要频繁切换登录 IP
+5. 帐号多加点好友和群
+
 ### 是否支持 Windows
 
-项目代码本身可以编译 Windows 版本，但在 svg 转 png 时用到了 [inkscape](https://inkscape.org/)，该软件提供 Windows 版本但本项目没有测试其可用性，如果您有这方面的需求，可以尝试在 Windows 下调用 inkscape 或重写 svg 转 png 的相关代码。（PR WELCOME）
+正在开发，可以查看 [#11](https://github.com/aimerneige/MiraiChess/issues/11) 追踪开发进度。
 
 ## 交流群
 
@@ -142,13 +151,6 @@ make run
 [857066811](https://qm.qq.com/cgi-bin/qm/qr?k=rMtw1SlmoFOp08i5Zw5bM361ljIyzVA-&authKey=9OUzro5oH5CnnFaAbIMwa60987+8ZMwu5GvUAlFUzDIQKVL91z9zUhWp6m1Kayf8&noverify=0)
 
 ![qrcode 857066811](img/qr-code.png)
-
-## TODO
-
-- [x] 提供 service 文件
-- [ ] 提供 docker 支持
-- [x] 完善文档
-- [x] 模块化支持
 
 ## LICENSE
 

@@ -14,10 +14,6 @@ printf "${GREEN}Start to update ./bin/bot.\n${NC}"
 rm $DIR/bin/bot
 cp ./bin/bot $DIR/bin/bot
 
-printf "${GREEN}Start to update ./scripts/board2svg.py.\n${NC}"
-rm $DIR/scripts/board2svg.py
-cp ./scripts/board2svg.py $DIR/scripts/board2svg.py
-
 printf "${GREEN}Start to update README.md.\n${NC}"
 rm $DIR/README.md
 cp ./README.md $DIR/README.md
