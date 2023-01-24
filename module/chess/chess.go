@@ -125,9 +125,9 @@ func (c *chess) Serve(b *bot.Bot) {
 		case msgString == "chess" || msgString == "下棋":
 			replyMsg = service.Game(c, msg.GroupCode, msg.Sender, logger)
 		case msgString == "resign" || msgString == "认输":
-			replyMsg = service.Resign(msg.GroupCode, msg.Sender, logger)
+			replyMsg = service.Resign(c, msg.GroupCode, msg.Sender, logger)
 		case msgString == "draw" || msgString == "和棋":
-			replyMsg = service.Draw(msg.GroupCode, msg.Sender, logger)
+			replyMsg = service.Draw(c, msg.GroupCode, msg.Sender, logger)
 		case msgString == "abort" || msgString == "中断":
 			replyMsg = service.Abort(c, msg.GroupCode, msg.Sender, logger)
 		case []rune(msgString)[0] == '!' || []rune(msgString)[0] == '！':
