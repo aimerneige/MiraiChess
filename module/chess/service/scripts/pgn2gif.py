@@ -9,7 +9,6 @@ import pgn2gif
 def generate_gif(pgn: str, out_dir: str, file_name: str):
     creator = pgn2gif.PgnToGifCreator(
         reverse=False, duration=1, ws_color='white', bs_color='gray')
-
     pgn_file_path = os.path.join(out_dir, file_name + ".pgn")
     with open(pgn_file_path, "w") as f:
         f.write(pgn)
