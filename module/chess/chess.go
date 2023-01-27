@@ -119,6 +119,10 @@ func (c *chess) Serve(b *bot.Bot) {
 		if msg.Sender.IsAnonymous() {
 			return
 		}
+		// 忽略空消息
+		if len(msg.ToString()) <= 0 {
+			return
+		}
 		// 解析消息内容
 		var replyMsg *message.SendingMessage
 		switch msgString := msg.ToString(); {
