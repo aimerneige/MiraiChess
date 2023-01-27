@@ -4,6 +4,7 @@ import (
 	"bytes"
 	_ "embed" // embed for cheese
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path"
@@ -24,7 +25,10 @@ var cheeseData []byte
 var helpString string
 
 //go:embed scripts/board2svg.py
-var pythonScript string
+var pythonScriptBoard2SVG string
+
+//go:embed scripts/pgn2gif.py
+var pythonScriptPGN2GIF string
 
 var instance *chessService
 var inkscapePath string
@@ -127,7 +131,7 @@ func Abort(c *client.QQClient, groupCode int64, sender *message.Sender, logger l
 }
 
 // Draw 和棋
-func Draw(groupCode int64, sender *message.Sender, logger logrus.FieldLogger) *message.SendingMessage {
+func Draw(c *client.QQClient, groupCode int64, sender *message.Sender, logger logrus.FieldLogger) *message.SendingMessage {
 	if room, ok := instance.gameRooms[groupCode]; ok {
 		if sender.Uin == room.whitePlayer || sender.Uin == room.blackPlayer {
 			room.lastMoveTime = time.Now().Unix()
@@ -154,8 +158,16 @@ func Draw(groupCode int64, sender *message.Sender, logger logrus.FieldLogger) *m
 				}
 				eloString = elo
 			}
+			replyMsg := textWithAt(sender.Uin, "接受和棋，游戏结束。\n"+eloString+chessString)
+			gif, msg, err := generateGIF(c, groupCode, chessString, logger)
+			if err != nil {
+				logger.WithError(err).Error("Fail to generate GIF.")
+				replyMsg.Append(message.NewText("\n\n[GIF - ERROR]\n" + msg))
+			} else {
+				replyMsg.Append(gif)
+			}
 			delete(instance.gameRooms, groupCode)
-			return textWithAt(sender.Uin, "接受和棋，游戏结束。\n"+eloString+chessString)
+			return replyMsg
 		}
 		return textWithAt(sender.Uin, "不是对局中的玩家，无法请求和棋。")
 	}
@@ -163,7 +175,7 @@ func Draw(groupCode int64, sender *message.Sender, logger logrus.FieldLogger) *m
 }
 
 // Resign 认输
-func Resign(groupCode int64, sender *message.Sender, logger logrus.FieldLogger) *message.SendingMessage {
+func Resign(c *client.QQClient, groupCode int64, sender *message.Sender, logger logrus.FieldLogger) *message.SendingMessage {
 	if room, ok := instance.gameRooms[groupCode]; ok {
 		// 检查是否是当前游戏玩家
 		if sender.Uin == room.whitePlayer || sender.Uin == room.blackPlayer {
@@ -205,11 +217,19 @@ func Resign(groupCode int64, sender *message.Sender, logger logrus.FieldLogger) 
 				}
 				eloString = elo
 			}
-			delete(instance.gameRooms, groupCode)
+			replyMsg := textWithAt(sender.Uin, "认输，游戏结束。\n"+eloString+chessString)
 			if isAprilFoolsDay() {
-				return textWithAt(sender.Uin, "对手认输，游戏结束，你胜利了。\n"+eloString+chessString)
+				replyMsg = textWithAt(sender.Uin, "对手认输，游戏结束，你胜利了。\n"+eloString+chessString)
 			}
-			return textWithAt(sender.Uin, "认输，游戏结束。\n"+eloString+chessString)
+			gif, msg, err := generateGIF(c, groupCode, chessString, logger)
+			if err != nil {
+				logger.WithError(err).Error("Fail to generate GIF.")
+				replyMsg.Append(message.NewText("\n\n[GIF - ERROR]\n" + msg))
+			} else {
+				replyMsg.Append(gif)
+			}
+			delete(instance.gameRooms, groupCode)
+			return replyMsg
 		}
 		return textWithAt(sender.Uin, "不是对局中的玩家，无法认输。")
 	}
@@ -286,8 +306,16 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 				}
 				eloString = elo
 			}
+			replyMsg := simpleText(msg + eloString + chessString).Append(boardImgEle)
+			gif, msg, err := generateGIF(c, groupCode, chessString, logger)
+			if err != nil {
+				logger.WithError(err).Error("Fail to generate GIF.")
+				replyMsg.Append(message.NewText("\n\n[GIF - ERROR]\n" + msg))
+			} else {
+				replyMsg.Append(gif)
+			}
 			delete(instance.gameRooms, groupCode)
-			return simpleText(msg + eloString + chessString).Append(boardImgEle)
+			return replyMsg
 		}
 		// 提示玩家继续游戏
 		var currentPlayer int64
@@ -304,7 +332,7 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 // Cheese Easter Egg
 func Cheese(c *client.QQClient, groupCode int64, logger logrus.FieldLogger) *message.SendingMessage {
 	// 上传图片
-	ele, err := c.UploadGroupImage(groupCode, bytes.NewReader(cheeseData))
+	ele, err := uploadImage(c, groupCode, bytes.NewReader(cheeseData), logger)
 	if err != nil {
 		logger.WithError(err).Error("Unable to upload image.")
 		return nil
@@ -363,6 +391,35 @@ func textWithAt(target int64, msg string) *message.SendingMessage {
 	return message.NewSendingMessage().Append(message.NewAt(target)).Append(message.NewText(msg))
 }
 
+func generateGIF(c *client.QQClient, groupCode int64, pgnStr string, logger logrus.FieldLogger) (*message.GroupImageElement, string, error) {
+	if err := exec.Command("python", "-c", pythonScriptPGN2GIF, pgnStr, tempFileDir, fmt.Sprintf("%d", groupCode)).Run(); err != nil {
+		logger.Info("python", " ", "-c", " ", "python_sript_pgn2gif", " ", pgnStr, " ", tempFileDir, " ", fmt.Sprintf("%d", groupCode))
+		return nil, "生成 gif 时发生错误", err
+	}
+	gifFilePath := path.Join(tempFileDir, fmt.Sprintf("%d.gif", groupCode))
+	f, err := os.Open(gifFilePath)
+	if err != nil {
+		logger.WithError(err).Errorf("Unable to read gif file in %s", gifFilePath)
+		return nil, "读取 gif 时发生错误", err
+	}
+	ele, err := uploadImage(c, groupCode, f, logger)
+	return ele, "", err
+}
+
+func uploadImage(c *client.QQClient, groupCode int64, img io.ReadSeeker, logger logrus.FieldLogger) (*message.GroupImageElement, error) {
+	// 尝试上传图片
+	ele, err := c.UploadGroupImage(groupCode, img)
+	// 发生错误时重试 3 次，否则报错
+	for i := 0; i < 3 && err != nil; i++ {
+		ele, err = c.UploadGroupImage(groupCode, img)
+	}
+	if err != nil {
+		logger.WithError(err).Error("Unable to upload image.")
+		return nil, err
+	}
+	return ele, nil
+}
+
 func abortGame(groupCode int64, hint string, logger logrus.FieldLogger) *message.SendingMessage {
 	room := instance.gameRooms[groupCode]
 	room.chessGame.Draw(chess.DrawOffer)
@@ -398,8 +455,8 @@ func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLog
 		svgFilePath := path.Join(tempFileDir, fmt.Sprintf("%d.svg", groupCode))
 		pngFilePath := path.Join(tempFileDir, fmt.Sprintf("%d.png", groupCode))
 		// 调用 python 脚本生成 svg 文件
-		if err := exec.Command("python", "-c", pythonScript, room.chessGame.FEN(), svgFilePath, uciStr).Run(); err != nil {
-			logger.Info("python", " ", "-c", " ", pythonScript, " ", room.chessGame.FEN(), " ", svgFilePath, " ", uciStr)
+		if err := exec.Command("python", "-c", pythonScriptBoard2SVG, room.chessGame.FEN(), svgFilePath, uciStr).Run(); err != nil {
+			logger.Info("python", " ", "-c", " ", "python_script_board2svg", " ", room.chessGame.FEN(), " ", svgFilePath, " ", uciStr)
 			logger.WithError(err).Error("Unable to generate svg file.")
 			return nil, false, "无法生成 svg 图片"
 		}
@@ -411,16 +468,12 @@ func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLog
 		// 尝试读取 png 图片
 		f, err := os.Open(pngFilePath)
 		if err != nil {
-			logger.WithError(err).Errorf("Unable to read open image file in %s.", pngFilePath)
+			logger.WithError(err).Errorf("Unable to read image file in %s.", pngFilePath)
 			return nil, false, "无法读取 png 图片"
 		}
 		defer f.Close()
 		// 上传图片并返回
-		ele, err := c.UploadGroupImage(groupCode, f)
-		// 发生错误时重试 3 次，否则报错
-		for i := 0; i < 3 && err != nil; i++ {
-			ele, err = c.UploadGroupImage(groupCode, f)
-		}
+		ele, err := uploadImage(c, groupCode, f, logger)
 		if err != nil {
 			logger.WithError(err).Error("Unable to upload image.")
 			return nil, false, "网络错误，无法上传图片"

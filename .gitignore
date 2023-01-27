@@ -46,6 +46,8 @@ session.token
 ### temp ###
 temp/*.png
 temp/*.svg
+temp/*.gif
+temp/*.pgn
 
 ### binary ###
 bin/inkscape
