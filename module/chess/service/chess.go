@@ -159,8 +159,9 @@ func Draw(c *client.QQClient, groupCode int64, sender *message.Sender, logger lo
 				eloString = elo
 			}
 			replyMsg := textWithAt(sender.Uin, "接受和棋，游戏结束。\n"+eloString+chessString)
-			gif, err, msg := generateGif(c, groupCode, chessString, logger)
+			gif, msg, err := generateGIF(c, groupCode, chessString, logger)
 			if err != nil {
+				logger.WithError(err).Error("Fail to generate GIF.")
 				replyMsg.Append(message.NewText("\n\n[GIF - ERROR]\n" + msg))
 			} else {
 				replyMsg.Append(gif)
@@ -220,8 +221,9 @@ func Resign(c *client.QQClient, groupCode int64, sender *message.Sender, logger 
 			if isAprilFoolsDay() {
 				replyMsg = textWithAt(sender.Uin, "对手认输，游戏结束，你胜利了。\n"+eloString+chessString)
 			}
-			gif, err, msg := generateGif(c, groupCode, chessString, logger)
+			gif, msg, err := generateGIF(c, groupCode, chessString, logger)
 			if err != nil {
+				logger.WithError(err).Error("Fail to generate GIF.")
 				replyMsg.Append(message.NewText("\n\n[GIF - ERROR]\n" + msg))
 			} else {
 				replyMsg.Append(gif)
@@ -305,8 +307,9 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 				eloString = elo
 			}
 			replyMsg := simpleText(msg + eloString + chessString).Append(boardImgEle)
-			gif, err, msg := generateGif(c, groupCode, chessString, logger)
+			gif, msg, err := generateGIF(c, groupCode, chessString, logger)
 			if err != nil {
+				logger.WithError(err).Error("Fail to generate GIF.")
 				replyMsg.Append(message.NewText("\n\n[GIF - ERROR]\n" + msg))
 			} else {
 				replyMsg.Append(gif)
@@ -388,18 +391,19 @@ func textWithAt(target int64, msg string) *message.SendingMessage {
 	return message.NewSendingMessage().Append(message.NewAt(target)).Append(message.NewText(msg))
 }
 
-func generateGif(c *client.QQClient, groupCode int64, pgnStr string, logger logrus.FieldLogger) (*message.GroupImageElement, error, string) {
+func generateGIF(c *client.QQClient, groupCode int64, pgnStr string, logger logrus.FieldLogger) (*message.GroupImageElement, string, error) {
 	if err := exec.Command("python", "-c", pythonScriptPGN2GIF, pgnStr, tempFileDir, fmt.Sprintf("%d", groupCode)).Run(); err != nil {
-		return nil, err, "生成 gif 时发生错误"
+		logger.Info("python", " ", "-c", " ", "python_sript_pgn2gif", " ", pgnStr, " ", tempFileDir, " ", fmt.Sprintf("%d", groupCode))
+		return nil, "生成 gif 时发生错误", err
 	}
 	gifFilePath := path.Join(tempFileDir, fmt.Sprintf("%d.gif", groupCode))
 	f, err := os.Open(gifFilePath)
 	if err != nil {
 		logger.WithError(err).Errorf("Unable to read gif file in %s", gifFilePath)
-		return nil, err, "读取 gif 时发生错误"
+		return nil, "读取 gif 时发生错误", err
 	}
 	ele, err := uploadImage(c, groupCode, f, logger)
-	return ele, err, ""
+	return ele, "", err
 }
 
 func uploadImage(c *client.QQClient, groupCode int64, img io.ReadSeeker, logger logrus.FieldLogger) (*message.GroupImageElement, error) {
@@ -452,7 +456,7 @@ func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLog
 		pngFilePath := path.Join(tempFileDir, fmt.Sprintf("%d.png", groupCode))
 		// 调用 python 脚本生成 svg 文件
 		if err := exec.Command("python", "-c", pythonScriptBoard2SVG, room.chessGame.FEN(), svgFilePath, uciStr).Run(); err != nil {
-			logger.Info("python", " ", "-c", " ", pythonScriptBoard2SVG, " ", room.chessGame.FEN(), " ", svgFilePath, " ", uciStr)
+			logger.Info("python", " ", "-c", " ", "python_script_board2svg", " ", room.chessGame.FEN(), " ", svgFilePath, " ", uciStr)
 			logger.WithError(err).Error("Unable to generate svg file.")
 			return nil, false, "无法生成 svg 图片"
 		}
