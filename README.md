@@ -4,6 +4,10 @@
 
 > 本来想起名为「MiraiGoChess」的，意为 Mirai 框架 + Go 语言 + 国际象棋，但是社区内有一个项目 [MiraiGoChess](https://github.com/Minxyzgo/MiraiGoChess) 已经用了这个名字，所以咱就叫 「MiraiChess」了。
 
+> **Note**
+> 目前的代码非常屎，仅供参考，不要学。\
+> 因为刚开始功能比较少就偷懒了，后面加了好多功能，懒得重构就越写越屎了。<sub>~能跑就行了要什么可扩展性~</sub>。
+
 使用 [MiraiGo-Template](https://github.com/Logiase/MiraiGo-Template) 实现的国际象棋机器人。
 
 <img src="https://raw.githubusercontent.com/aimerneige/MiraiChess/master/img/bot.jpeg" alt="bot">
@@ -91,7 +95,8 @@ systemctl enable mirai-chess.service
 
 ## 如何编译
 
-> :warning: 如果你打算手动编译，请在 [release](https://github.com/aimerneige/MiraiChess/releases) 下载一份最新稳定代码，不要直接使用 master 分支。
+> **warning**
+> 如果你打算手动编译，请在 [release](https://github.com/aimerneige/MiraiChess/releases) 下载一份最新稳定代码，不要直接使用 master 分支。
 
 环境依赖：
 
