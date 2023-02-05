@@ -20,3 +20,4 @@ elo:
 inkscape: "./bin/inkscape" # inkscape 可执行文件路径
 # inkscape: "C:\\Program Files\\Inkscape\\bin\\inkscape.exe" # Windows 下
 temp: "./temp/" # 临时文件夹，用于存放脚本生成的棋盘图片
+theme: "red" # 修改棋盘主题，支持 red green gray 三种，不填或填其他会使用默认主题

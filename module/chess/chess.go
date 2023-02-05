@@ -41,6 +41,7 @@ var chessConfig struct {
 	} `json:"elo"`
 	Inkscape string `json:"inkscape"`
 	Temp     string `json:"temp"`
+	Theme    string `json:"theme"`
 }
 
 type chess struct {
@@ -72,6 +73,7 @@ func (c *chess) Init() {
 	}
 	service.UpdateELOConfig(chessConfig.ELO.Enable, chessConfig.ELO.Default)
 	service.UpdateFSConfig(chessConfig.Inkscape, chessConfig.Temp)
+	service.UpdateBoardTheme(chessConfig.Theme)
 }
 
 // PostInit 第二次初始化

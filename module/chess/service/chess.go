@@ -35,6 +35,7 @@ var inkscapePath string
 var tempFileDir string
 var eloEnabled bool
 var eloDefault int
+var boardTheme string
 
 type chessService struct {
 	gameRooms map[int64]chessRoom
@@ -66,6 +67,14 @@ func UpdateFSConfig(inkscape, temp string) {
 func UpdateELOConfig(enabled bool, defaultValue int) {
 	eloEnabled = enabled
 	eloDefault = defaultValue
+}
+
+// UpdateBoardTheme update board theme config
+func UpdateBoardTheme(theme string) {
+	boardTheme = theme
+	if boardTheme == "" {
+		boardTheme = "default"
+	}
 }
 
 // Game 下棋
@@ -455,8 +464,8 @@ func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLog
 		svgFilePath := path.Join(tempFileDir, fmt.Sprintf("%d.svg", groupCode))
 		pngFilePath := path.Join(tempFileDir, fmt.Sprintf("%d.png", groupCode))
 		// 调用 python 脚本生成 svg 文件
-		if err := exec.Command("python", "-c", pythonScriptBoard2SVG, room.chessGame.FEN(), svgFilePath, uciStr).Run(); err != nil {
-			logger.Info("python", " ", "-c", " ", "python_script_board2svg", " ", room.chessGame.FEN(), " ", svgFilePath, " ", uciStr)
+		if err := exec.Command("python", "-c", pythonScriptBoard2SVG, room.chessGame.FEN(), svgFilePath, uciStr, boardTheme).Run(); err != nil {
+			logger.Info("python", " ", "-c", " ", "python_script_board2svg", " ", room.chessGame.FEN(), " ", svgFilePath, " ", uciStr, " ", boardTheme)
 			logger.WithError(err).Error("Unable to generate svg file.")
 			return nil, false, "无法生成 svg 图片"
 		}

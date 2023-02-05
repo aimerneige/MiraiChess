@@ -32,7 +32,7 @@ red_theme = {
 }
 
 
-def generate_board_svg(fen_str: str, file_path: str, last_move_uci: str):
+def generate_board_svg(fen_str: str, file_path: str, last_move_uci: str, forced_theme: str):
     board = chess.Board(fen_str)
 
     king_square = None
@@ -51,6 +51,13 @@ def generate_board_svg(fen_str: str, file_path: str, last_move_uci: str):
     elif is_april_fools_day():
         themes = green_theme
     elif is_12_13_day():
+        themes = gray_theme
+
+    if forced_theme = 'red':
+        themes = red_theme
+    elif forced_theme = 'green':
+        themes = green_theme
+    elif forced_theme = 'gray':
         themes = gray_theme
 
     svg = chess.svg.board(
@@ -88,11 +95,12 @@ def is_12_13_day() -> bool:
 
 if __name__ == "__main__":
     args = sys.argv
-    if len(args) != 4:
+    if len(args) != 5:
         print("Wrong args")
         exit(1)
     fen_str = args[1]
     file_path = args[2]
     last_move_uci = args[3]
-    generate_board_svg(fen_str, file_path, last_move_uci)
+    forced_theme = args[4]
+    generate_board_svg(fen_str, file_path, last_move_uci, forced_theme)
     exit(0)
