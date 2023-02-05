@@ -48,6 +48,9 @@ type chessRoom struct {
 	blackName    string
 	drawPlayer   int64
 	lastMoveTime int64
+	isBlindfold  bool
+	whiteErr     bool // 违例记录（盲棋用）
+	blackErr     bool
 }
 
 func init() {
@@ -70,45 +73,12 @@ func UpdateELOConfig(enabled bool, defaultValue int) {
 
 // Game 下棋
 func Game(c *client.QQClient, groupCode int64, sender *message.Sender, logger logrus.FieldLogger) *message.SendingMessage {
-	if room, ok := instance.gameRooms[groupCode]; ok {
-		if room.blackPlayer != 0 {
-			// 检测对局是否已存在超过 6 小时
-			if (time.Now().Unix() - room.lastMoveTime) > 21600 {
-				return abortGame(groupCode, "对局已存在超过 6 小时，游戏结束。", logger).Append(message.NewText("\n\n已有对局已被中断，如需创建新对局请重新发送指令。")).Append(message.NewAt(sender.Uin))
-			}
-			// 对局在进行
-			msg := textWithAt(sender.Uin, "对局已在进行中，无法创建或加入对局，当前对局玩家为：")
-			if room.whitePlayer != 0 {
-				msg.Append(message.NewAt(room.whitePlayer))
-			}
-			if room.blackPlayer != 0 {
-				msg.Append(message.NewAt(room.blackPlayer))
-			}
-			msg.Append(message.NewText("，群主或管理员发送「中断」或「abort」可中断对局（自动判和）。"))
-			return msg
-		}
-		if sender.Uin == room.whitePlayer {
-			return textWithAt(sender.Uin, "请等候其他玩家加入游戏。")
-		}
-		room.blackPlayer = sender.Uin
-		room.blackName = sender.Nickname
-		instance.gameRooms[groupCode] = room
-		boardImgEle, ok, errMsg := getBoardElement(c, groupCode, logger)
-		if !ok {
-			return errorText(errMsg)
-		}
-		return simpleText("黑棋已加入对局，请白方下棋。").Append(message.NewAt(room.whitePlayer)).Append(boardImgEle)
-	}
-	instance.gameRooms[groupCode] = chessRoom{
-		chessGame:    chess.NewGame(),
-		whitePlayer:  sender.Uin,
-		whiteName:    sender.Nickname,
-		blackPlayer:  0,
-		blackName:    "",
-		drawPlayer:   0,
-		lastMoveTime: time.Now().Unix(),
-	}
-	return simpleText("已创建新的对局，发送「下棋」或「chess」可加入对局。")
+	return createGame(false, c, groupCode, sender, logger)
+}
+
+// Blindfold 盲棋
+func Blindfold(c *client.QQClient, groupCode int64, sender *message.Sender, logger logrus.FieldLogger) *message.SendingMessage {
+	return createGame(true, c, groupCode, sender, logger)
 }
 
 // Abort 中断对局
@@ -254,7 +224,46 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 		room.lastMoveTime = time.Now().Unix()
 		// 走棋
 		if err := room.chessGame.MoveStr(moveStr); err != nil {
-			return simpleText(fmt.Sprintf("移动「%s」违规，请检查，格式请参考「代数记谱法」(Algebraic notation)。", moveStr))
+			// 指令错误时检查
+			if !room.isBlindfold {
+				// 未开启盲棋，提示指令错误
+				return simpleText(fmt.Sprintf("移动「%s」违规，请检查，格式请参考「代数记谱法」(Algebraic notation)。", moveStr))
+			}
+			// 开启盲棋，判断违例情况
+			var currentPlayerColor chess.Color
+			if sender.Uin == room.whitePlayer {
+				currentPlayerColor = chess.White
+			} else {
+				currentPlayerColor = chess.Black
+			}
+			// 第一次违例，提示
+			_flag := false
+			if (currentPlayerColor == chess.White) && !room.whiteErr {
+				room.whiteErr = true
+				instance.gameRooms[groupCode] = room
+				_flag = true
+			}
+			if (currentPlayerColor == chess.Black) && !room.blackErr {
+				room.blackErr = true
+				instance.gameRooms[groupCode] = room
+				_flag = true
+			}
+			if _flag {
+				return simpleText(fmt.Sprintf("移动「%s」违例，再次违例会立即判负。", moveStr))
+			}
+			// 出现多次违例，判负
+			room.chessGame.Resign(currentPlayerColor)
+			chessString := getChessString(room)
+			replyMsg := textWithAt(sender.Uin, "违例两次，游戏结束。\n"+chessString)
+			gif, msg, err := generateGIF(c, groupCode, chessString, logger)
+			if err != nil {
+				logger.WithError(err).Error("Fail to generate GIF.")
+				replyMsg.Append(message.NewText("\n\n[GIF - ERROR]\n" + msg))
+			} else {
+				replyMsg.Append(gif)
+			}
+			delete(instance.gameRooms, groupCode)
+			return replyMsg
 		}
 		// 走子之后，视为拒绝和棋
 		if room.drawPlayer != 0 {
@@ -262,9 +271,14 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 			instance.gameRooms[groupCode] = room
 		}
 		// 生成棋盘图片
-		boardImgEle, ok, errMsg := getBoardElement(c, groupCode, logger)
-		if !ok {
-			return errorText(errMsg)
+		var boardImgEle *message.GroupImageElement
+		if !room.isBlindfold {
+			var ok bool
+			var errMsg string
+			boardImgEle, ok, errMsg = getBoardElement(c, groupCode, logger)
+			if !ok {
+				return errorText(errMsg)
+			}
 		}
 		// 检查游戏是否结束
 		if room.chessGame.Method() != chess.NoMethod {
@@ -306,7 +320,10 @@ func Play(c *client.QQClient, groupCode int64, sender *message.Sender, moveStr s
 				}
 				eloString = elo
 			}
-			replyMsg := simpleText(msg + eloString + chessString).Append(boardImgEle)
+			replyMsg := simpleText(msg + eloString + chessString)
+			if !room.isBlindfold {
+				replyMsg.Append(boardImgEle)
+			}
 			gif, msg, err := generateGIF(c, groupCode, chessString, logger)
 			if err != nil {
 				logger.WithError(err).Error("Fail to generate GIF.")
@@ -391,6 +408,7 @@ func textWithAt(target int64, msg string) *message.SendingMessage {
 	return message.NewSendingMessage().Append(message.NewAt(target)).Append(message.NewText(msg))
 }
 
+// generateGIF 使用 PGN 字符串生成对局的 GIF
 func generateGIF(c *client.QQClient, groupCode int64, pgnStr string, logger logrus.FieldLogger) (*message.GroupImageElement, string, error) {
 	if err := exec.Command("python", "-c", pythonScriptPGN2GIF, pgnStr, tempFileDir, fmt.Sprintf("%d", groupCode)).Run(); err != nil {
 		logger.Info("python", " ", "-c", " ", "python_sript_pgn2gif", " ", pgnStr, " ", tempFileDir, " ", fmt.Sprintf("%d", groupCode))
@@ -406,6 +424,7 @@ func generateGIF(c *client.QQClient, groupCode int64, pgnStr string, logger logr
 	return ele, "", err
 }
 
+// uploadImage 上传图片
 func uploadImage(c *client.QQClient, groupCode int64, img io.ReadSeeker, logger logrus.FieldLogger) (*message.GroupImageElement, error) {
 	// 尝试上传图片
 	ele, err := c.UploadGroupImage(groupCode, img)
@@ -420,6 +439,70 @@ func uploadImage(c *client.QQClient, groupCode int64, img io.ReadSeeker, logger 
 	return ele, nil
 }
 
+// createGame 创建游戏
+func createGame(isBlindfold bool, c *client.QQClient, groupCode int64, sender *message.Sender, logger logrus.FieldLogger) *message.SendingMessage {
+	if room, ok := instance.gameRooms[groupCode]; ok {
+		if room.blackPlayer != 0 {
+			// 检测对局是否已存在超过 6 小时
+			if (time.Now().Unix() - room.lastMoveTime) > 21600 {
+				return abortGame(groupCode, "对局已存在超过 6 小时，游戏结束。", logger).Append(message.NewText("\n\n已有对局已被中断，如需创建新对局请重新发送指令。")).Append(message.NewAt(sender.Uin))
+			}
+			// 对局在进行
+			msg := textWithAt(sender.Uin, "对局已在进行中，无法创建或加入对局，当前对局玩家为：")
+			if room.whitePlayer != 0 {
+				msg.Append(message.NewAt(room.whitePlayer))
+			}
+			if room.blackPlayer != 0 {
+				msg.Append(message.NewAt(room.blackPlayer))
+			}
+			msg.Append(message.NewText("，群主或管理员发送「中断」或「abort」可中断对局（自动判和）。"))
+			return msg
+		}
+		if sender.Uin == room.whitePlayer {
+			return textWithAt(sender.Uin, "请等候其他玩家加入游戏。")
+		}
+		if room.isBlindfold && !isBlindfold {
+			return simpleText("已创建盲棋对局，请加入或等待盲棋对局结束之后创建普通对局。")
+		}
+		if !room.isBlindfold && isBlindfold {
+			return simpleText("已创建普通对局，请加入或等待普通对局结束之后创建盲棋对局。")
+		}
+		room.blackPlayer = sender.Uin
+		room.blackName = sender.Nickname
+		instance.gameRooms[groupCode] = room
+		var boardImgEle *message.GroupImageElement
+		if !room.isBlindfold {
+			var ok bool
+			var errMsg string
+			boardImgEle, ok, errMsg = getBoardElement(c, groupCode, logger)
+			if !ok {
+				return errorText(errMsg)
+			}
+		}
+		if isBlindfold {
+			return simpleText("黑棋已加入对局，请白方下棋。").Append(message.NewAt(room.whitePlayer))
+		}
+		return simpleText("黑棋已加入对局，请白方下棋。").Append(message.NewAt(room.whitePlayer)).Append(boardImgEle)
+	}
+	instance.gameRooms[groupCode] = chessRoom{
+		chessGame:    chess.NewGame(),
+		whitePlayer:  sender.Uin,
+		whiteName:    sender.Nickname,
+		blackPlayer:  0,
+		blackName:    "",
+		drawPlayer:   0,
+		lastMoveTime: time.Now().Unix(),
+		isBlindfold:  isBlindfold,
+		whiteErr:     false,
+		blackErr:     false,
+	}
+	if isBlindfold {
+		return simpleText("已创建新的盲棋对局，发送「盲棋」或「blind」可加入对局。")
+	}
+	return simpleText("已创建新的对局，发送「下棋」或「chess」可加入对局。")
+}
+
+// abortGame 中断游戏
 func abortGame(groupCode int64, hint string, logger logrus.FieldLogger) *message.SendingMessage {
 	room := instance.gameRooms[groupCode]
 	room.chessGame.Draw(chess.DrawOffer)
@@ -442,6 +525,7 @@ func abortGame(groupCode int64, hint string, logger logrus.FieldLogger) *message
 	return msg
 }
 
+// getBoardElement 获取棋盘图片的消息内容
 func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLogger) (*message.GroupImageElement, bool, string) {
 	if room, ok := instance.gameRooms[groupCode]; ok {
 		var uciStr string
@@ -485,6 +569,7 @@ func getBoardElement(c *client.QQClient, groupCode int64, logger logrus.FieldLog
 	return nil, false, "对局不存在"
 }
 
+// getChessString 获取 PGN 字符串
 func getChessString(room chessRoom) string {
 	game := room.chessGame
 	siteString := "[Site \"github.com/aimerneige/MiraiChess\"]\n"
@@ -496,6 +581,7 @@ func getChessString(room chessRoom) string {
 	return siteString + dataString + whiteString + blackString + chessString
 }
 
+// getELOString 获得玩家等级分的文本内容
 func getELOString(room chessRoom, whiteScore, blackScore float64, dbService *DBService) (string, error) {
 	if room.whitePlayer == 0 || room.blackPlayer == 0 {
 		return "", nil
@@ -514,6 +600,7 @@ func getELOString(room chessRoom, whiteScore, blackScore float64, dbService *DBS
 	return eloString, nil
 }
 
+// getRankingString 获取等级分排行榜的文本内容
 func getRankingString(dbService *DBService) (string, error) {
 	eloList, err := dbService.GetHighestRateList()
 	if err != nil {
@@ -577,6 +664,7 @@ func getELORate(whiteUin, blackUin int64, dbService *DBService) (whiteRate int, 
 	return
 }
 
+// isAprilFoolsDay 判断当前时间是否为愚人节期间
 func isAprilFoolsDay() bool {
 	now := time.Now()
 	return now.Month() == 4 && now.Day() == 1

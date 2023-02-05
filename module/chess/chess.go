@@ -134,6 +134,8 @@ func (c *chess) Serve(b *bot.Bot) {
 			replyMsg = service.Draw(c, msg.GroupCode, msg.Sender, logger)
 		case msgString == "abort" || msgString == "中断":
 			replyMsg = service.Abort(c, msg.GroupCode, msg.Sender, logger)
+		case msgString == "blind" || msgString == "盲棋":
+			replyMsg = service.Blindfold(c, msg.GroupCode, msg.Sender, logger)
 		case []rune(msgString)[0] == '!' || []rune(msgString)[0] == '！':
 			moveStr := string([]rune(msgString)[1:])
 			moveStr = strings.TrimSpace(moveStr)
