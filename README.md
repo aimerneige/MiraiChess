@@ -39,6 +39,17 @@ I assume that most of the users of this repo are Chinese, so there will be no En
 pip install python-chess
 ```
 
+安装 python 库 [pgn2gif](https://github.com/dn1z/pgn2gif)
+
+> *Warning*\
+> 这个库不可以通过 pip 安装，必须 clone 源码后手动安装
+
+```bash
+git clone https://github.com/dn1z/pgn2gif.git
+cd pgn2gif
+sudo python setup.py install
+```
+
 下载最新 [release](https://github.com/aimerneige/MiraiChess/releases) 或 [自己编译](https://github.com/aimerneige/MiraiChess#%E5%A6%82%E4%BD%95%E7%BC%96%E8%AF%91)。
 
 解压 release：
@@ -156,6 +167,7 @@ make run
 1. [inkscape](https://inkscape.org/release/)
 2. [python](https://www.python.org/downloads/)
 3. [python-chess](https://github.com/niklasf/python-chess)
+4. [pgn2gif](https://github.com/dn1z/pgn2gif)
 
 #### 编译
 
