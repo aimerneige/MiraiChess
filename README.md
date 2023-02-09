@@ -198,6 +198,17 @@ go build -o bin/bot.exe cmd/bot/bot.go
 .\bin\bot.exe
 ```
 
+### 无法生成 PNG
+
+您的发行版无法运行 AppImage 封装的 Inkscape，常见于 Ubuntu。一般地，使用下面的指令安装 `libfuse2` 即可。（仅 Ubuntu）
+
+```bash
+sudo add-apt-repository universe
+sudo apt install libfuse2
+```
+
+有任何疑问请参考 https://github.com/AppImage/AppImageKit/wiki/FUSE#install-fuse。
+
 ## 交流群
 
 点击链接或扫码加入 QQ 群:
