@@ -41,7 +41,7 @@ pip install python-chess
 
 安装 python 库 [pgn2gif](https://github.com/dn1z/pgn2gif)
 
-> *Warning*\
+> **Warning**\
 > 这个库不可以通过 pip 安装，必须 clone 源码后手动安装
 
 ```bash
