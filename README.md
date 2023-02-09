@@ -207,7 +207,7 @@ sudo add-apt-repository universe
 sudo apt install libfuse2
 ```
 
-有任何疑问请参考 https://github.com/AppImage/AppImageKit/wiki/FUSE#install-fuse。
+有任何疑问请参考 https://github.com/AppImage/AppImageKit/wiki/FUSE#install-fuse
 
 ## 交流群
 
