@@ -1,5 +1,8 @@
 # MiraiChess
 
+> **Warning**\
+> 由于上游仓库 [MiraiGo-Template](https://github.com/Logiase/MiraiGo-Template) 已长久无人维护，本项目无法继续提供稳定服务，故计划使用新的框架重构，如果您在使用本项目的过程中遇到任何问题请等待新项目。
+
 ![MiraiChess](https://socialify.git.ci/aimerneige/MiraiChess/image?description=1&font=Bitter&forks=1&issues=1&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1&theme=Light)
 
 > 本来想起名为「MiraiGoChess」的，意为 Mirai 框架 + Go 语言 + 国际象棋，但是社区内有一个项目 [MiraiGoChess](https://github.com/Minxyzgo/MiraiGoChess) 已经用了这个名字，所以咱就叫 「MiraiChess」了。
