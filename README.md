@@ -1,7 +1,9 @@
 # MiraiChess
 
 > **Warning**\
-> 由于上游仓库 [MiraiGo-Template](https://github.com/Logiase/MiraiGo-Template) 已长久无人维护，本项目无法继续提供稳定服务，故计划使用新的框架重构，如果您在使用本项目的过程中遇到任何问题请等待新项目。
+> 由于上游仓库 [MiraiGo-Template](https://github.com/Logiase/MiraiGo-Template) 已长久无人维护，本项目计划使用新的框架重构。
+>
+> 请查阅 [yukichan-bot](https://github.com/aimerneige/yukichan-bot)，本项目终止维护。
 
 ![MiraiChess](https://socialify.git.ci/aimerneige/MiraiChess/image?description=1&font=Bitter&forks=1&issues=1&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1&theme=Light)
 
